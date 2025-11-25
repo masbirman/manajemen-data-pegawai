@@ -1,0 +1,499 @@
+.user-management {
+  padding: 20px;
+}
+
+.user-management .content-header {
+  margin-bottom: 24px;
+}
+
+.user-management .content-header h1 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.user-management .subtitle {
+  color: #666;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0;
+}
+
+.tab {
+  padding: 12px 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: #333;
+}
+
+.tab.active {
+  color: var(--accent-color, #2563eb);
+  border-bottom-color: var(--accent-color, #2563eb);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.btn-primary {
+  background: var(--accent-color, #2563eb);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.btn-icon:hover {
+  background: #f3f4f6;
+}
+
+.btn-icon.danger:hover {
+  background: #fee2e2;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.users-table th,
+.users-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.users-table th {
+  background: #f9fafb;
+  font-weight: 600;
+  font-size: 13px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.users-table td {
+  font-size: 14px;
+}
+
+.users-table tr:hover {
+  background: #f9fafb;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.role-badge.operator {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.role-badge.viewer {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.role-badge.superadmin {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #374151;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent-color, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+/* Permissions Section */
+.permissions-section h2 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.info-text {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.permission-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.role-title {
+  font-size: 16px;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.role-title.operator {
+  border-bottom-color: #2563eb;
+}
+
+.role-title.viewer {
+  border-bottom-color: #6b7280;
+}
+
+.permission-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.permission-item:hover {
+  background: #f9fafb;
+}
+
+.permission-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.permission-name {
+  font-size: 14px;
+}
+
+.error-message {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+/* Dark mode */
+body.dark-mode .users-table {
+  background: #1f2937;
+}
+
+body.dark-mode .users-table th {
+  background: #374151;
+  color: #9ca3af;
+}
+
+body.dark-mode .users-table td {
+  border-bottom-color: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode .users-table tr:hover {
+  background: #374151;
+}
+
+body.dark-mode .modal {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+body.dark-mode .form-group label {
+  color: #d1d5db;
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group select {
+  background: #374151;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+body.dark-mode .permission-card {
+  background: #1f2937;
+}
+
+body.dark-mode .permission-item:hover {
+  background: #374151;
+}
+
+body.dark-mode .btn-secondary {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode .tabs {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .tab {
+  color: #9ca3af;
+}
+
+body.dark-mode .tab:hover {
+  color: #e5e7eb;
+}
+
+/* Avatar styles */
+.avatar-cell {
+  position: relative;
+  display: inline-block;
+}
+
+.user-avatar-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.user-avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.avatar-edit-btn {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s;
+}
+
+.avatar-edit-btn:hover {
+  background: #f3f4f6;
+  transform: scale(1.1);
+}
+
+.avatar-preview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.avatar-preview-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e5e7eb;
+}
+
+.avatar-preview-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 36px;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.form-group input[type="file"]:hover {
+  border-color: var(--accent-color, #2563eb);
+}

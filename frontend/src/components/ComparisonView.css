@@ -1,0 +1,136 @@
+.comparison-view {
+  max-width: 100%;
+}
+
+.comparison-controls {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 150px;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.control-group select {
+  padding: 10px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.control-group select:focus {
+  outline: none;
+  border-color: #2196f3;
+}
+
+.compare-button {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.compare-button:hover:not(:disabled) {
+  background-color: #1976d2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.compare-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.comparison-info {
+  background: #e3f2fd;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #2196f3;
+}
+
+.comparison-info p {
+  margin: 0;
+  color: #1565c0;
+  font-size: 0.95rem;
+}
+
+.error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c33;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .comparison-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .control-group {
+    min-width: auto;
+  }
+
+  .compare-button {
+    width: 100%;
+  }
+}
+
+/* Dark Mode */
+body.dark-mode .comparison-controls {
+  background: #2d2d2d;
+}
+
+body.dark-mode .control-group label {
+  color: #e5e7eb;
+}
+
+body.dark-mode .control-group select {
+  background: #374151;
+  color: #e5e7eb;
+  border-color: #4b5563;
+}
+
+body.dark-mode .comparison-info {
+  background: #1e3a5f;
+  border-left-color: #60a5fa;
+}
+
+body.dark-mode .comparison-info p {
+  color: #93c5fd;
+}
+
+body.dark-mode .error-message {
+  background: #3a1e1e;
+  color: #fca5a5;
+  border-left-color: #ef4444;
+}

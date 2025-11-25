@@ -1,0 +1,32 @@
+# Docker
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node modules
+frontend/node_modules/
+node_modules/
+
+# Python
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+*.pyo
+backend/.pytest_cache/
+backend/.hypothesis/
+
+# Uploads (user data)
+backend/uploads/
+
+# Backup files
+*.sql
+backup*.sql
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log

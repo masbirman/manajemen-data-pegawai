@@ -1,0 +1,123 @@
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  min-width: 300px;
+  max-width: 500px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  animation: slideIn 0.3s ease-out;
+  font-family: var(--app-font, "Plus Jakarta Sans"), sans-serif;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.notification-message {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.notification-close:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Success */
+.notification-success {
+  background-color: #d4edda;
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+/* Error */
+.notification-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+/* Warning */
+.notification-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border-left: 4px solid #ffc107;
+}
+
+/* Info */
+.notification-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border-left: 4px solid #17a2b8;
+}
+
+/* Dark Mode */
+body.dark-mode .notification-success {
+  background-color: #1e3a1e;
+  color: #86efac;
+  border-left-color: #22c55e;
+}
+
+body.dark-mode .notification-error {
+  background-color: #3a1e1e;
+  color: #fca5a5;
+  border-left-color: #ef4444;
+}
+
+body.dark-mode .notification-warning {
+  background-color: #3a3a1e;
+  color: #fde047;
+  border-left-color: #f59e0b;
+}
+
+body.dark-mode .notification-info {
+  background-color: #1e2a3a;
+  color: #7dd3fc;
+  border-left-color: #06b6d4;
+}
+
+body.dark-mode .notification-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+    max-width: none;
+  }
+}
