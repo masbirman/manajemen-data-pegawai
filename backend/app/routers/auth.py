@@ -357,7 +357,7 @@ async def change_password(
 ):
     """Change current user's password."""
     # Verify current password
-    if not User.verify_password(password_data.current_password, current_user.hashed_password):
+    if not current_user.verify_password(password_data.current_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Current password is incorrect"
