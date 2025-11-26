@@ -194,17 +194,29 @@ function Sidebar({
           <div className="user-info">
             {currentUser.avatar_url ? (
               <img
-                src={currentUser.avatar_url}
+                src={currentUser.avatar_url.replace(
+                  /http:\/\/localhost:\d+/,
+                  process.env.REACT_APP_API_URL || "http://localhost:8000"
+                )}
                 alt={currentUser.username}
                 className="user-avatar-image"
+                onError={(e) => {
+                  // If image fails to load, hide it and show placeholder
+                  e.target.style.display = "none";
+                  e.target.nextSibling.style.display = "flex";
+                }}
               />
-            ) : (
-              <div className="user-avatar">
-                {currentUser.full_name
-                  ? currentUser.full_name.charAt(0).toUpperCase()
-                  : currentUser.username.charAt(0).toUpperCase()}
-              </div>
-            )}
+            ) : null}
+            <div
+              className="user-avatar"
+              style={{
+                display: currentUser.avatar_url ? "none" : "flex",
+              }}
+            >
+              {currentUser.full_name
+                ? currentUser.full_name.charAt(0).toUpperCase()
+                : currentUser.username.charAt(0).toUpperCase()}
+            </div>
             <div className="user-details">
               <span className="user-name">
                 {currentUser.full_name || currentUser.username}

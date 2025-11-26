@@ -700,8 +700,9 @@ async def upload_user_avatar(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Update user avatar URL
-        user.avatar_url = f"http://localhost:8000/uploads/avatars/{filename}"
+        # Update user avatar URL - use environment variable for base URL
+        api_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+        user.avatar_url = f"{api_url}/uploads/avatars/{filename}"
         db.commit()
         db.refresh(user)
         
