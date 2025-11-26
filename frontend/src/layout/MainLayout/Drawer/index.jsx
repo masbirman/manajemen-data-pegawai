@@ -8,7 +8,10 @@ import DrawerHeader from "./DrawerHeader";
 import DrawerContent from "./DrawerContent";
 import MiniDrawerStyled from "./MiniDrawerStyled";
 
-// ==============================|| MAIN DRAWER ||============================== //
+// Able Pro dark sidebar color
+const SIDEBAR_BG = "#1e2a3b";
+
+// ==============================|| MAIN DRAWER - ABLE PRO STYLE ||============================== //
 
 const MainDrawer = ({
   open,
@@ -38,7 +41,11 @@ const MainDrawer = ({
     ),
     [activeMenu, onMenuChange, currentUser, hasPermission]
   );
-  const drawerHeader = useMemo(() => <DrawerHeader open={open} />, [open]);
+
+  const drawerHeader = useMemo(
+    () => <DrawerHeader open={open} currentUser={currentUser} />,
+    [open, currentUser]
+  );
 
   return (
     <Box
@@ -63,9 +70,10 @@ const MainDrawer = ({
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
-              borderRight: `1px solid ${theme.palette.divider}`,
+              borderRight: "none",
               backgroundImage: "none",
               boxShadow: "inherit",
+              backgroundColor: SIDEBAR_BG,
             },
           }}
         >

@@ -6,7 +6,7 @@ import { Box, Toolbar, useMediaQuery } from "@mui/material";
 import Drawer from "./Drawer";
 import Header from "./Header";
 
-// ==============================|| MAIN LAYOUT ||============================== //
+// ==============================|| MAIN LAYOUT - ABLE PRO STYLE ||============================== //
 
 const MainLayout = ({
   children,
@@ -30,7 +30,7 @@ const MainLayout = ({
   }, [matchDownLG]);
 
   return (
-    <Box sx={{ display: "flex", width: "100%", height: "100vh" }}>
+    <Box sx={{ display: "flex", width: "100%", minHeight: "100vh" }}>
       <Header
         open={open}
         handleDrawerToggle={handleDrawerToggle}
@@ -48,11 +48,15 @@ const MainLayout = ({
       <Box
         component="main"
         sx={{
-          width: "100%",
+          width: open ? "calc(100% - 260px)" : "100%",
           flexGrow: 1,
           p: { xs: 2, sm: 3 },
-          height: "100vh",
-          overflow: "auto",
+          bgcolor: "#f5f7fa",
+          minHeight: "100vh",
+          transition: theme.transitions.create(["width", "margin"], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
         }}
       >
         <Toolbar />

@@ -2,7 +2,7 @@ import { Box, List, Typography } from "@mui/material";
 import NavItem from "./NavItem";
 import menuItems from "../../../../../menu-items";
 
-// ==============================|| NAVIGATION ||============================== //
+// ==============================|| NAVIGATION - ABLE PRO STYLE ||============================== //
 
 const Navigation = ({
   activeMenu,
@@ -14,23 +14,25 @@ const Navigation = ({
     switch (item.type) {
       case "group":
         return (
-          <Box key={item.id} sx={{ pt: 2, pb: 1 }}>
+          <Box key={item.id} sx={{ pt: 1.5, pb: 0.5 }}>
             {item.title && (
               <Typography
                 variant="caption"
                 sx={{
-                  px: 3,
+                  px: 2.5,
                   py: 1,
-                  color: "text.secondary",
+                  display: "block",
+                  color: "rgba(255,255,255,0.4)",
                   fontWeight: 600,
                   textTransform: "uppercase",
-                  fontSize: "0.75rem",
+                  fontSize: "0.7rem",
+                  letterSpacing: "0.5px",
                 }}
               >
                 {item.title}
               </Typography>
             )}
-            <List sx={{ px: 1.5 }}>
+            <List sx={{ px: 1.5, py: 0 }}>
               {item.children?.map((menuItem) => (
                 <NavItem
                   key={menuItem.id}
@@ -52,7 +54,7 @@ const Navigation = ({
     }
   });
 
-  return <Box sx={{ pt: 1 }}>{navGroups}</Box>;
+  return <Box sx={{ pt: 0.5 }}>{navGroups}</Box>;
 };
 
 export default Navigation;

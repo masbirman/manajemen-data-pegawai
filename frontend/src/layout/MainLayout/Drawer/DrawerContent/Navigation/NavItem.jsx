@@ -1,22 +1,19 @@
 import PropTypes from "prop-types";
-import { forwardRef, useEffect } from "react";
 import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Typography,
+  Chip,
 } from "@mui/material";
 
-// ==============================|| NAVIGATION - LIST ITEM ||============================== //
+// ==============================|| NAVIGATION - LIST ITEM - ABLE PRO STYLE ||============================== //
 
 const NavItem = ({ item, level, activeMenu, onMenuChange }) => {
   const Icon = item.icon;
   const itemIcon = item.icon ? <Icon style={{ fontSize: "1.25rem" }} /> : false;
 
   const isSelected = activeMenu === item.id;
-
-  const textColor = "text.primary";
-  const iconSelectedColor = "primary.main";
 
   return (
     <ListItemButton
@@ -29,16 +26,19 @@ const NavItem = ({ item, level, activeMenu, onMenuChange }) => {
         py: 1,
         mb: 0.5,
         borderRadius: 1,
+        color: isSelected ? "#ffffff" : "rgba(255,255,255,0.7)",
         "&:hover": {
-          bgcolor: "primary.lighter",
+          bgcolor: "rgba(255,255,255,0.08)",
+          color: "#ffffff",
         },
         "&.Mui-selected": {
-          bgcolor: "primary.lighter",
-          borderRight: "2px solid",
-          borderColor: "primary.main",
-          color: iconSelectedColor,
+          bgcolor: "#5b8def",
+          color: "#ffffff",
           "&:hover": {
-            bgcolor: "primary.lighter",
+            bgcolor: "#4a7de0",
+          },
+          "& .MuiListItemIcon-root": {
+            color: "#ffffff",
           },
         },
       }}
@@ -47,7 +47,7 @@ const NavItem = ({ item, level, activeMenu, onMenuChange }) => {
         <ListItemIcon
           sx={{
             minWidth: 36,
-            color: isSelected ? iconSelectedColor : textColor,
+            color: isSelected ? "#ffffff" : "rgba(255,255,255,0.7)",
           }}
         >
           {itemIcon}
@@ -59,13 +59,26 @@ const NavItem = ({ item, level, activeMenu, onMenuChange }) => {
             variant="body2"
             sx={{
               fontWeight: isSelected ? 600 : 400,
-              color: isSelected ? iconSelectedColor : textColor,
+              color: "inherit",
+              fontSize: "0.875rem",
             }}
           >
             {item.title}
           </Typography>
         }
       />
+      {item.chip && (
+        <Chip
+          label={item.chip.label}
+          size="small"
+          sx={{
+            height: 20,
+            fontSize: "0.65rem",
+            bgcolor: item.chip.color || "#5b8def",
+            color: "#ffffff",
+          }}
+        />
+      )}
     </ListItemButton>
   );
 };
