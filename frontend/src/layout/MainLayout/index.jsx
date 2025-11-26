@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import { Box, Toolbar, useMediaQuery } from "@mui/material";
 
@@ -10,6 +9,7 @@ import Header from "./Header";
 // ==============================|| MAIN LAYOUT ||============================== //
 
 const MainLayout = ({
+  children,
   activeMenu,
   onMenuChange,
   currentUser,
@@ -50,7 +50,7 @@ const MainLayout = ({
         sx={{ width: "100%", flexGrow: 1, p: { xs: 2, sm: 3 } }}
       >
         <Toolbar />
-        <Outlet />
+        {children}
       </Box>
     </Box>
   );
