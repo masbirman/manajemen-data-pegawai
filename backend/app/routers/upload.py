@@ -116,23 +116,26 @@ async def upload_file(
                 detail=f"Validation errors: {' | '.join(all_errors)}"
             )
         
-        # Check if data already exists for this month/year/unit and delete first
+        # Check if data already exists for this month/year/unit
+        # Only delete records with status 'Aktif' to preserve comparison results (Keluar, Pensiun, etc.)
         existing_count = db.query(Pegawai).filter(
             Pegawai.month == month,
             Pegawai.year == year,
-            Pegawai.unit == unit
+            Pegawai.unit == unit,
+            Pegawai.status == 'Aktif'
         ).count()
         
         if existing_count > 0:
-            # Delete existing data for this month/year/unit
-            logger.info(f"Found {existing_count} existing records for {unit} {month}/{year}. Replacing...")
+            # Delete only 'Aktif' records - preserve Keluar, Pensiun, etc. from comparison
+            logger.info(f"Found {existing_count} existing 'Aktif' records for {unit} {month}/{year}. Replacing...")
             db.query(Pegawai).filter(
                 Pegawai.month == month,
                 Pegawai.year == year,
-                Pegawai.unit == unit
+                Pegawai.unit == unit,
+                Pegawai.status == 'Aktif'
             ).delete(synchronize_session=False)
             db.commit()  # Commit delete before adding new records
-            logger.info(f"Deleted {existing_count} existing records")
+            logger.info(f"Deleted {existing_count} existing 'Aktif' records")
         
         # Store validated data in database
         logger.info(f"Storing {len(records)} records to database")
