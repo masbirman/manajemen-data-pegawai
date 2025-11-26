@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Sidebar from "./components/Sidebar";
+import Layout from "./components/Layout";
 import Dashboard from "./components/Dashboard";
 import FileUpload from "./components/FileUpload";
 import ComparisonView from "./components/ComparisonView";
@@ -14,6 +14,7 @@ import Notification from "./components/Notification";
 import { useNotification } from "./hooks/useNotification";
 import { getComparison } from "./api/api";
 import "./App.css";
+import "./styles/common.css";
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -521,29 +522,25 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="App">
-        <Sidebar
-          activeMenu={activeMenu}
-          onMenuChange={setActiveMenu}
-          currentUser={currentUser}
-          onLogout={handleLogout}
-          hasPermission={hasPermission}
+      <Layout
+        activeMenu={activeMenu}
+        onMenuChange={setActiveMenu}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        hasPermission={hasPermission}
+      >
+        {renderContent()}
+      </Layout>
+
+      {/* Notification System */}
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={hideNotification}
+          duration={notification.duration}
         />
-
-        <div className="main-content">
-          <main className="content-area">{renderContent()}</main>
-        </div>
-
-        {/* Notification System */}
-        {notification && (
-          <Notification
-            message={notification.message}
-            type={notification.type}
-            onClose={hideNotification}
-            duration={notification.duration}
-          />
-        )}
-      </div>
+      )}
     </ErrorBoundary>
   );
 }
