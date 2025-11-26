@@ -20,6 +20,7 @@ function ArchiveViewer({ hasPermission }) {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -45,9 +46,18 @@ function ArchiveViewer({ hasPermission }) {
         const search = autoSearch ? null : searchTerm.trim() || null;
 
         const result = await getArchiveData(month, year, unit, search);
-        setArchiveData(result.data);
 
-        if (result.data.length === 0) {
+        // Filter by status if selected
+        let filteredData = result.data;
+        if (selectedStatus) {
+          filteredData = result.data.filter(
+            (item) => item.status === selectedStatus
+          );
+        }
+
+        setArchiveData(filteredData);
+
+        if (filteredData.length === 0) {
           setError("Tidak ada data yang sesuai dengan filter");
         }
       } catch (err) {
@@ -57,7 +67,7 @@ function ArchiveViewer({ hasPermission }) {
         setLoading(false);
       }
     },
-    [selectedMonth, selectedYear, selectedUnit, searchTerm]
+    [selectedMonth, selectedYear, selectedUnit, selectedStatus, searchTerm]
   );
 
   useEffect(() => {
@@ -66,15 +76,16 @@ function ArchiveViewer({ hasPermission }) {
 
   // Auto-search when filters change (but not search term - that needs manual trigger)
   useEffect(() => {
-    if (selectedMonth || selectedYear || selectedUnit) {
+    if (selectedMonth || selectedYear || selectedUnit || selectedStatus) {
       handleSearch(true); // true = auto-search, don't include searchTerm
     }
-  }, [selectedMonth, selectedYear, selectedUnit, handleSearch]);
+  }, [selectedMonth, selectedYear, selectedUnit, selectedStatus, handleSearch]);
 
   const handleReset = () => {
     setSelectedMonth("");
     setSelectedYear("");
     setSelectedUnit("");
+    setSelectedStatus("");
     setSearchTerm("");
     setArchiveData(null);
     setError(null);
@@ -138,6 +149,22 @@ function ArchiveViewer({ hasPermission }) {
             </select>
           </div>
 
+          <div className="filter-group">
+            <label>Status:</label>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+            >
+              <option value="">Semua Status</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Masuk">Masuk</option>
+              <option value="Keluar">Keluar</option>
+              <option value="Pensiun">Pensiun</option>
+              <option value="Pindah">Pindah</option>
+              <option value="Rekening Berbeda">Rekening Berbeda</option>
+            </select>
+          </div>
+
           <div className="filter-group search-group">
             <label>Cari (NIP/Nama):</label>
             <input
@@ -185,6 +212,7 @@ function ArchiveViewer({ hasPermission }) {
                     { month: "long" }
                   )}`}
                 {selectedYear && ` ${selectedYear}`}
+                {selectedStatus && ` dengan status ${selectedStatus}`}
                 {searchTerm && ` dengan pencarian "${searchTerm}"`}
               </p>
             </div>
