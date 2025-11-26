@@ -93,9 +93,37 @@ function App() {
       showNotification(message, type);
     };
 
+    const handleGlobalSettingsUpdate = async () => {
+      // Reload settings when Super Admin updates them
+      try {
+        const token = localStorage.getItem("token");
+        const API_BASE_URL =
+          process.env.REACT_APP_API_URL || "http://localhost:8000";
+        const response = await fetch(`${API_BASE_URL}/app-settings`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          applyGlobalSettings(data.settings);
+        }
+      } catch (error) {
+        console.error("Failed to reload settings:", error);
+      }
+    };
+
     window.addEventListener("showNotification", handleShowNotification);
+    window.addEventListener(
+      "globalSettingsUpdated",
+      handleGlobalSettingsUpdate
+    );
+
     return () => {
       window.removeEventListener("showNotification", handleShowNotification);
+      window.removeEventListener(
+        "globalSettingsUpdated",
+        handleGlobalSettingsUpdate
+      );
     };
   }, [showNotification]);
 
@@ -246,15 +274,121 @@ function App() {
     }
   };
 
-  const handleLoginSuccess = (user, permissions) => {
+  const handleLoginSuccess = async (user, permissions) => {
     setIsAuthenticated(true);
     setCurrentUser(user);
     setUserPermissions(permissions || []);
     localStorage.setItem("permissions", JSON.stringify(permissions || []));
+
+    // Load global app settings
+    try {
+      const token = localStorage.getItem("token");
+      const API_BASE_URL =
+        process.env.REACT_APP_API_URL || "http://localhost:8000";
+      const response = await fetch(`${API_BASE_URL}/app-settings`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const settings = data.settings;
+
+        // Apply settings
+        applyGlobalSettings(settings);
+      }
+    } catch (error) {
+      console.error("Failed to load app settings:", error);
+    }
+
     showNotification(
       `Selamat datang, ${user.full_name || user.username}!`,
       "success"
     );
+  };
+
+  // Function to apply global settings
+  const applyGlobalSettings = (settings) => {
+    if (!settings) return;
+
+    // Apply theme colors
+    const THEME_COLORS = {
+      blue: { primary: "#1e3a8a", secondary: "#1e40af" },
+      green: { primary: "#065f46", secondary: "#047857" },
+      purple: { primary: "#5b21b6", secondary: "#6d28d9" },
+      red: { primary: "#991b1b", secondary: "#b91c1c" },
+      dark: { primary: "#1f2937", secondary: "#374151" },
+      white: { primary: "#ffffff", secondary: "#f3f4f6" },
+      gray: { primary: "#6b7280", secondary: "#9ca3af" },
+    };
+
+    const ACCENT_COLORS = {
+      blue: "#2563eb",
+      green: "#10b981",
+      orange: "#f59e0b",
+      red: "#ef4444",
+      purple: "#8b5cf6",
+    };
+
+    const FONTS = {
+      inter: "'Inter', sans-serif",
+      jakarta: "'Plus Jakarta Sans', sans-serif",
+      poppins: "'Poppins', sans-serif",
+    };
+
+    if (settings.themeColor && THEME_COLORS[settings.themeColor]) {
+      const theme = THEME_COLORS[settings.themeColor];
+      document.documentElement.style.setProperty(
+        "--sidebar-primary",
+        theme.primary
+      );
+      document.documentElement.style.setProperty(
+        "--sidebar-secondary",
+        theme.secondary
+      );
+    }
+
+    if (settings.accentColor && ACCENT_COLORS[settings.accentColor]) {
+      document.documentElement.style.setProperty(
+        "--accent-color",
+        ACCENT_COLORS[settings.accentColor]
+      );
+    }
+
+    if (settings.selectedFont && FONTS[settings.selectedFont]) {
+      document.documentElement.style.setProperty(
+        "--app-font",
+        FONTS[settings.selectedFont]
+      );
+    }
+
+    if (settings.fontSize) {
+      document.documentElement.style.setProperty(
+        "--font-scale",
+        parseInt(settings.fontSize) / 100
+      );
+    }
+
+    if (settings.sidebarWidth) {
+      const widths = { narrow: "180px", normal: "250px", wide: "320px" };
+      document.documentElement.style.setProperty(
+        "--sidebar-width",
+        widths[settings.sidebarWidth] || "250px"
+      );
+    }
+
+    if (settings.contentSpacing) {
+      const spacings = { compact: "0.75", normal: "1", comfortable: "1.5" };
+      document.documentElement.style.setProperty(
+        "--spacing-scale",
+        spacings[settings.contentSpacing] || "1"
+      );
+    }
+
+    if (settings.darkMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
   };
 
   // Check if user has permission

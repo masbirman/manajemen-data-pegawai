@@ -102,6 +102,10 @@ app.include_router(update.router)
 from app.routers import backup
 app.include_router(backup.router)
 
+# Import app settings router
+from app.routers import app_settings
+app.include_router(app_settings.router)
+
 
 @app.on_event("startup")
 async def startup_event():

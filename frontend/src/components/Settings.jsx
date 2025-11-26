@@ -129,75 +129,121 @@ function Settings() {
     );
   }, [contentSpacing]);
 
-  const handleSave = () => {
-    localStorage.setItem("itemsPerPage", itemsPerPage);
-    localStorage.setItem("defaultUnit", defaultUnit);
-    localStorage.setItem("themeColor", themeColor);
-    localStorage.setItem("accentColor", accentColor);
-    localStorage.setItem("selectedFont", selectedFont);
-    localStorage.setItem("darkMode", darkMode);
-    localStorage.setItem("fontSize", fontSize);
-    localStorage.setItem("sidebarWidth", sidebarWidth);
-    localStorage.setItem("contentSpacing", contentSpacing);
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const API_BASE_URL =
+        process.env.REACT_APP_API_URL || "http://localhost:8000";
 
-    setMessage({
-      type: "success",
-      text: "Pengaturan berhasil disimpan! Perubahan langsung diterapkan.",
-    });
+      // Save global settings to database (Super Admin only)
+      const response = await fetch(`${API_BASE_URL}/app-settings`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          fontSize,
+          sidebarWidth,
+          contentSpacing,
+          themeColor,
+          accentColor,
+          selectedFont,
+          darkMode,
+        }),
+      });
 
-    window.dispatchEvent(new Event("storage"));
+      if (!response.ok) {
+        throw new Error("Failed to save settings");
+      }
+
+      // Also save to localStorage for immediate effect
+      localStorage.setItem("itemsPerPage", itemsPerPage);
+      localStorage.setItem("defaultUnit", defaultUnit);
+
+      setMessage({
+        type: "success",
+        text: "Pengaturan berhasil disimpan untuk semua user! Perubahan langsung diterapkan.",
+      });
+
+      // Trigger global settings update
+      window.dispatchEvent(new CustomEvent("globalSettingsUpdated"));
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: "Gagal menyimpan pengaturan: " + error.message,
+      });
+    }
 
     setTimeout(() => setMessage(null), 5000);
   };
 
-  const handleReset = () => {
-    setItemsPerPage("100");
-    setDefaultUnit("Dinas");
-    setThemeColor("blue");
-    setAccentColor("blue");
-    setSelectedFont("jakarta");
-    setDarkMode(false);
-    setFontSize("100");
-    setSidebarWidth("normal");
-    setContentSpacing("normal");
+  const handleReset = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const API_BASE_URL =
+        process.env.REACT_APP_API_URL || "http://localhost:8000";
 
-    localStorage.removeItem("itemsPerPage");
-    localStorage.removeItem("defaultUnit");
-    localStorage.removeItem("themeColor");
-    localStorage.removeItem("accentColor");
-    localStorage.removeItem("selectedFont");
-    localStorage.removeItem("darkMode");
-    localStorage.removeItem("fontSize");
-    localStorage.removeItem("sidebarWidth");
-    localStorage.removeItem("contentSpacing");
+      // Reset global settings in database
+      const response = await fetch(`${API_BASE_URL}/app-settings/reset`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    document.documentElement.style.setProperty(
-      "--sidebar-primary",
-      THEME_COLORS.blue.primary
-    );
-    document.documentElement.style.setProperty(
-      "--sidebar-secondary",
-      THEME_COLORS.blue.secondary
-    );
-    document.documentElement.style.setProperty(
-      "--accent-color",
-      ACCENT_COLORS.blue
-    );
-    document.documentElement.style.setProperty(
-      "--app-font",
-      FONTS.jakarta.value
-    );
-    document.documentElement.style.setProperty("--font-scale", 1);
-    document.documentElement.style.setProperty("--sidebar-width", "250px");
-    document.documentElement.style.setProperty("--spacing-scale", 1);
-    document.body.classList.remove("dark-mode");
+      if (!response.ok) {
+        throw new Error("Failed to reset settings");
+      }
 
-    setMessage({
-      type: "success",
-      text: "Pengaturan berhasil direset ke default!",
-    });
+      // Reset local state
+      setItemsPerPage("100");
+      setDefaultUnit("Dinas");
+      setThemeColor("blue");
+      setAccentColor("blue");
+      setSelectedFont("jakarta");
+      setDarkMode(false);
+      setFontSize("100");
+      setSidebarWidth("normal");
+      setContentSpacing("normal");
 
-    window.dispatchEvent(new Event("storage"));
+      localStorage.removeItem("itemsPerPage");
+      localStorage.removeItem("defaultUnit");
+
+      document.documentElement.style.setProperty(
+        "--sidebar-primary",
+        THEME_COLORS.blue.primary
+      );
+      document.documentElement.style.setProperty(
+        "--sidebar-secondary",
+        THEME_COLORS.blue.secondary
+      );
+      document.documentElement.style.setProperty(
+        "--accent-color",
+        ACCENT_COLORS.blue
+      );
+      document.documentElement.style.setProperty(
+        "--app-font",
+        FONTS.jakarta.value
+      );
+      document.documentElement.style.setProperty("--font-scale", 1);
+      document.documentElement.style.setProperty("--sidebar-width", "250px");
+      document.documentElement.style.setProperty("--spacing-scale", 1);
+      document.body.classList.remove("dark-mode");
+
+      setMessage({
+        type: "success",
+        text: "Pengaturan berhasil direset ke default untuk semua user!",
+      });
+
+      // Trigger global settings update
+      window.dispatchEvent(new CustomEvent("globalSettingsUpdated"));
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: "Gagal reset pengaturan: " + error.message,
+      });
+    }
 
     setTimeout(() => setMessage(null), 3000);
   };
