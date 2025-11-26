@@ -53,6 +53,11 @@ class PasswordReset(BaseModel):
     new_password: str
 
 
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
 class PermissionUpdate(BaseModel):
     role: str
     permissions: List[str]
@@ -342,6 +347,28 @@ async def reset_user_password(
     
     logger.info(f"Password reset for {user.username} by {current_user.username}")
     return {"status": "success", "message": f"Password reset for {user.username}"}
+
+
+@router.post("/change-password")
+async def change_password(
+    password_data: PasswordChange,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Change current user's password."""
+    # Verify current password
+    if not User.verify_password(password_data.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+    
+    # Update password
+    current_user.hashed_password = User.hash_password(password_data.new_password)
+    db.commit()
+    
+    logger.info(f"Password changed for user {current_user.username}")
+    return {"status": "success", "message": "Password changed successfully"}
 
 
 # ==================== PERMISSION MANAGEMENT (Super Admin Only) ====================

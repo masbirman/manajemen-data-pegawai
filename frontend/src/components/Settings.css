@@ -160,8 +160,9 @@ input:checked + .toggle-slider:before {
   box-shadow: 0 0 0 2px white, 0 0 0 4px #1e3a8a;
 }
 
-/* Select */
-.setting-select {
+/* Select and Input */
+.setting-select,
+.setting-input {
   padding: 10px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -172,7 +173,8 @@ input:checked + .toggle-slider:before {
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 
-.setting-select:focus {
+.setting-select:focus,
+.setting-input:focus {
   outline: none;
   border-color: var(--accent-color, #2563eb);
 }
@@ -243,7 +245,8 @@ body.dark-mode .setting-item {
   border-bottom-color: #374151;
 }
 
-body.dark-mode .setting-select {
+body.dark-mode .setting-select,
+body.dark-mode .setting-input {
   background-color: #374151;
   color: #e5e7eb;
   border-color: #4b5563;

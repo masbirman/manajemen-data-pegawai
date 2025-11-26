@@ -49,6 +49,12 @@ function Settings() {
   );
   const [message, setMessage] = useState(null);
 
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState(null);
+
   useEffect(() => {
     // Apply theme colors
     const theme = THEME_COLORS[themeColor];
@@ -142,6 +148,73 @@ function Settings() {
     window.dispatchEvent(new Event("storage"));
 
     setTimeout(() => setMessage(null), 3000);
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordMessage({ type: "error", text: "Semua field harus diisi!" });
+      setTimeout(() => setPasswordMessage(null), 3000);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage({ type: "error", text: "Password baru tidak cocok!" });
+      setTimeout(() => setPasswordMessage(null), 3000);
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordMessage({
+        type: "error",
+        text: "Password minimal 6 karakter!",
+      });
+      setTimeout(() => setPasswordMessage(null), 3000);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${
+          process.env.REACT_APP_API_URL || "http://localhost:8000"
+        }/auth/change-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            current_password: currentPassword,
+            new_password: newPassword,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setPasswordMessage({
+          type: "success",
+          text: "Password berhasil diubah!",
+        });
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        setPasswordMessage({
+          type: "error",
+          text: data.detail || "Gagal mengubah password",
+        });
+      }
+    } catch (error) {
+      setPasswordMessage({
+        type: "error",
+        text: "Terjadi kesalahan saat mengubah password",
+      });
+    }
+
+    setTimeout(() => setPasswordMessage(null), 3000);
   };
 
   return (
@@ -284,6 +357,64 @@ function Settings() {
               <option value="PPPK">PPPK</option>
             </select>
           </div>
+        </div>
+
+        {/* Password Change */}
+        <div className="settings-section">
+          <h3>🔒 Ubah Password</h3>
+
+          {passwordMessage && (
+            <div className={`settings-message ${passwordMessage.type}`}>
+              {passwordMessage.text}
+            </div>
+          )}
+
+          <div className="setting-item">
+            <div className="setting-label">
+              <span>Password Saat Ini</span>
+            </div>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="setting-input"
+              placeholder="Masukkan password saat ini"
+            />
+          </div>
+
+          <div className="setting-item">
+            <div className="setting-label">
+              <span>Password Baru</span>
+            </div>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="setting-input"
+              placeholder="Masukkan password baru (min. 6 karakter)"
+            />
+          </div>
+
+          <div className="setting-item">
+            <div className="setting-label">
+              <span>Konfirmasi Password Baru</span>
+            </div>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="setting-input"
+              placeholder="Masukkan ulang password baru"
+            />
+          </div>
+
+          <button
+            className="save-button"
+            onClick={handleChangePassword}
+            style={{ marginTop: "16px" }}
+          >
+            🔒 Ubah Password
+          </button>
         </div>
       </div>
 
