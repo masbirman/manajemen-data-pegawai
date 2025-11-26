@@ -112,11 +112,20 @@ function App() {
       }
     };
 
+    // Listen for localStorage changes from other tabs
+    const handleStorageChange = (e) => {
+      if (e.key === "settingsUpdateTrigger") {
+        // Settings updated in another tab, reload
+        handleGlobalSettingsUpdate();
+      }
+    };
+
     window.addEventListener("showNotification", handleShowNotification);
     window.addEventListener(
       "globalSettingsUpdated",
       handleGlobalSettingsUpdate
     );
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
       window.removeEventListener("showNotification", handleShowNotification);
@@ -124,6 +133,7 @@ function App() {
         "globalSettingsUpdated",
         handleGlobalSettingsUpdate
       );
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, [showNotification]);
 

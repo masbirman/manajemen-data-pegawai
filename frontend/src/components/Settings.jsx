@@ -163,11 +163,14 @@ function Settings() {
 
       setMessage({
         type: "success",
-        text: "Pengaturan berhasil disimpan untuk semua user! Perubahan langsung diterapkan.",
+        text: "Pengaturan berhasil disimpan untuk semua user! Perubahan langsung diterapkan ke semua tab.",
       });
 
-      // Trigger global settings update
+      // Trigger global settings update in current tab
       window.dispatchEvent(new CustomEvent("globalSettingsUpdated"));
+
+      // Broadcast to other tabs using localStorage event
+      localStorage.setItem("settingsUpdateTrigger", Date.now().toString());
     } catch (error) {
       setMessage({
         type: "error",
