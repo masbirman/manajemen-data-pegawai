@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
+import os
 from sqlalchemy.exc import OperationalError
 from app.database import init_db
 from app.routers import upload, compare, template, admin, archive, update, auth, landing
@@ -41,9 +42,6 @@ app.add_middleware(
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 (UPLOAD_DIR / "landing").mkdir(exist_ok=True)
-
-# Mount static files for uploads
-app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR.absolute())), name="uploads")
 
 
 # Error handlers
@@ -135,3 +133,17 @@ async def health_check():
     Health check endpoint.
     """
     return {"status": "healthy"}
+
+
+@app.get("/uploads/{folder}/{filename}")
+async def serve_upload(folder: str, filename: str):
+    """
+    Serve uploaded files with CORS headers.
+    """
+    file_path = UPLOAD_DIR / folder / filename
+    if not file_path.exists():
+        return JSONResponse(
+            status_code=404,
+            content={"error": "File not found"}
+        )
+    return FileResponse(file_path)
