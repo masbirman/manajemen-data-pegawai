@@ -140,7 +140,10 @@ function LandingPage({ onLoginSuccess }) {
               style={{ height: `${settings.image_height}px` }}
             >
               <img
-                src={settings.illustration_url}
+                src={settings.illustration_url.replace(
+                  "http://localhost:3000",
+                  process.env.REACT_APP_API_URL || "http://localhost:8000"
+                )}
                 alt="Illustration"
                 className="illustration-image"
                 style={{ width: `${settings.image_width}%` }}

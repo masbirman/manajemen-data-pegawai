@@ -28,7 +28,11 @@ function Sidebar({
 
           // Use API settings if available
           if (settings.sidebar_logo_url) {
-            setLogoSrc(settings.sidebar_logo_url);
+            const fixedUrl = settings.sidebar_logo_url.replace(
+              "http://localhost:3000",
+              process.env.REACT_APP_API_URL || "http://localhost:8000"
+            );
+            setLogoSrc(fixedUrl);
           }
           if (settings.sidebar_title) {
             setTitle(settings.sidebar_title);
