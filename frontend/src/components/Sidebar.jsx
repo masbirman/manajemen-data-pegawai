@@ -58,8 +58,19 @@ function Sidebar({
       if (updatedTheme) setThemeColor(updatedTheme);
     };
 
+    // Listen for profile updates
+    const handleProfileUpdate = () => {
+      // Force re-render by triggering parent component update
+      window.location.reload();
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
   }, []);
   const menuItems = [
     {
@@ -109,6 +120,13 @@ function Sidebar({
       icon: "🏠",
       label: "Landing Page",
       description: "Customize landing page",
+      superadminOnly: true,
+    },
+    {
+      id: "profile",
+      icon: "👤",
+      label: "Edit Profil",
+      description: "Kelola profil Anda",
       superadminOnly: true,
     },
     {

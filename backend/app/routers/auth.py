@@ -400,6 +400,134 @@ async def change_password(
     return {"status": "success", "message": "Password changed successfully"}
 
 
+class ProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+
+
+@router.put("/profile")
+async def update_own_profile(
+    profile_data: ProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Update current user's own profile."""
+    try:
+        if profile_data.full_name is not None:
+            current_user.full_name = profile_data.full_name
+        
+        if profile_data.email is not None:
+            # Check if email already exists for another user
+            existing = db.query(User).filter(
+                User.email == profile_data.email,
+                User.id != current_user.id
+            ).first()
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already in use"
+                )
+            current_user.email = profile_data.email
+        
+        db.commit()
+        db.refresh(current_user)
+        
+        logger.info(f"Profile updated for user {current_user.username}")
+        return {"status": "success", "user": current_user.to_dict()}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Profile update error: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post("/profile/avatar")
+async def upload_own_avatar(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Upload avatar for current user."""
+    try:
+        # Validate file type
+        allowed_extensions = ['.png', '.jpg', '.jpeg', '.webp']
+        file_ext = os.path.splitext(file.filename)[1].lower()
+        if file_ext not in allowed_extensions:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid file type. Allowed: {', '.join(allowed_extensions)}"
+            )
+        
+        # Generate unique filename
+        filename = f"avatar_{current_user.id}{file_ext}"
+        file_path = AVATAR_UPLOAD_DIR / filename
+        
+        # Delete old avatar if exists
+        if current_user.avatar_url:
+            old_filename = current_user.avatar_url.split('/')[-1]
+            old_path = AVATAR_UPLOAD_DIR / old_filename
+            if old_path.exists():
+                old_path.unlink()
+        
+        # Save new file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Update user avatar URL - use environment variable for base URL
+        api_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+        current_user.avatar_url = f"{api_url}/uploads/avatars/{filename}"
+        db.commit()
+        db.refresh(current_user)
+        
+        logger.info(f"Avatar uploaded for {current_user.username}")
+        
+        return {
+            "status": "success",
+            "message": "Avatar uploaded successfully",
+            "avatar_url": current_user.avatar_url,
+            "user": current_user.to_dict()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Avatar upload error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.delete("/profile/avatar")
+async def delete_own_avatar(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Delete avatar for current user."""
+    try:
+        if not current_user.avatar_url:
+            raise HTTPException(status_code=404, detail="No avatar found")
+        
+        # Delete file
+        filename = current_user.avatar_url.split('/')[-1]
+        file_path = AVATAR_UPLOAD_DIR / filename
+        if file_path.exists():
+            file_path.unlink()
+        
+        # Clear avatar URL
+        current_user.avatar_url = None
+        db.commit()
+        
+        logger.info(f"Avatar deleted for {current_user.username}")
+        
+        return {"status": "success", "message": "Avatar deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Avatar delete error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 # ==================== PERMISSION MANAGEMENT (Super Admin Only) ====================
 
 AVAILABLE_PERMISSIONS = [

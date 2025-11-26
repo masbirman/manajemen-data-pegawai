@@ -6,6 +6,7 @@ import ComparisonView from "./components/ComparisonView";
 import AdminPanel from "./components/AdminPanel";
 import ArchiveViewer from "./components/ArchiveViewer";
 import Settings from "./components/Settings";
+import ProfileSettings from "./components/ProfileSettings";
 import LandingPage from "./components/LandingPage";
 import LandingPageSettings from "./components/LandingPageSettings";
 import UserManagement from "./components/UserManagement";
@@ -347,6 +348,9 @@ function App() {
       case "user-management":
         if (currentUser?.role !== "superadmin") return <PermissionDenied />;
         return <UserManagement />;
+
+      case "profile":
+        return <ProfileSettings />;
 
       case "settings":
         return <Settings />;
