@@ -47,6 +47,15 @@ function Settings() {
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem("darkMode") === "true"
   );
+  const [fontSize, setFontSize] = useState(
+    localStorage.getItem("fontSize") || "100"
+  );
+  const [sidebarWidth, setSidebarWidth] = useState(
+    localStorage.getItem("sidebarWidth") || "normal"
+  );
+  const [contentSpacing, setContentSpacing] = useState(
+    localStorage.getItem("contentSpacing") || "normal"
+  );
   const [message, setMessage] = useState(null);
 
   // Password change state
@@ -89,6 +98,37 @@ function Settings() {
     }
   }, [darkMode]);
 
+  useEffect(() => {
+    // Apply font size scale
+    document.documentElement.style.setProperty("--font-scale", fontSize / 100);
+  }, [fontSize]);
+
+  useEffect(() => {
+    // Apply sidebar width
+    const widths = {
+      narrow: "180px",
+      normal: "250px",
+      wide: "320px",
+    };
+    document.documentElement.style.setProperty(
+      "--sidebar-width",
+      widths[sidebarWidth]
+    );
+  }, [sidebarWidth]);
+
+  useEffect(() => {
+    // Apply content spacing
+    const spacings = {
+      compact: "0.75",
+      normal: "1",
+      comfortable: "1.5",
+    };
+    document.documentElement.style.setProperty(
+      "--spacing-scale",
+      spacings[contentSpacing]
+    );
+  }, [contentSpacing]);
+
   const handleSave = () => {
     localStorage.setItem("itemsPerPage", itemsPerPage);
     localStorage.setItem("defaultUnit", defaultUnit);
@@ -96,10 +136,13 @@ function Settings() {
     localStorage.setItem("accentColor", accentColor);
     localStorage.setItem("selectedFont", selectedFont);
     localStorage.setItem("darkMode", darkMode);
+    localStorage.setItem("fontSize", fontSize);
+    localStorage.setItem("sidebarWidth", sidebarWidth);
+    localStorage.setItem("contentSpacing", contentSpacing);
 
     setMessage({
       type: "success",
-      text: "Pengaturan berhasil disimpan! Refresh halaman untuk melihat perubahan.",
+      text: "Pengaturan berhasil disimpan! Perubahan langsung diterapkan.",
     });
 
     window.dispatchEvent(new Event("storage"));
@@ -114,6 +157,9 @@ function Settings() {
     setAccentColor("blue");
     setSelectedFont("jakarta");
     setDarkMode(false);
+    setFontSize("100");
+    setSidebarWidth("normal");
+    setContentSpacing("normal");
 
     localStorage.removeItem("itemsPerPage");
     localStorage.removeItem("defaultUnit");
@@ -121,6 +167,9 @@ function Settings() {
     localStorage.removeItem("accentColor");
     localStorage.removeItem("selectedFont");
     localStorage.removeItem("darkMode");
+    localStorage.removeItem("fontSize");
+    localStorage.removeItem("sidebarWidth");
+    localStorage.removeItem("contentSpacing");
 
     document.documentElement.style.setProperty(
       "--sidebar-primary",
@@ -138,6 +187,9 @@ function Settings() {
       "--app-font",
       FONTS.jakarta.value
     );
+    document.documentElement.style.setProperty("--font-scale", 1);
+    document.documentElement.style.setProperty("--sidebar-width", "250px");
+    document.documentElement.style.setProperty("--spacing-scale", 1);
     document.body.classList.remove("dark-mode");
 
     setMessage({
@@ -264,6 +316,100 @@ function Settings() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="setting-item">
+            <div className="setting-label">
+              <span>📏 Ukuran Font</span>
+              <p>Sesuaikan ukuran teks di seluruh aplikasi</p>
+            </div>
+            <div className="font-size-control">
+              <input
+                type="range"
+                min="80"
+                max="120"
+                step="5"
+                value={fontSize}
+                onChange={(e) => setFontSize(e.target.value)}
+                className="font-size-slider"
+              />
+              <div className="font-size-labels">
+                <span className={fontSize === "80" ? "active" : ""}>80%</span>
+                <span className={fontSize === "90" ? "active" : ""}>90%</span>
+                <span className={fontSize === "100" ? "active" : ""}>100%</span>
+                <span className={fontSize === "110" ? "active" : ""}>110%</span>
+                <span className={fontSize === "120" ? "active" : ""}>120%</span>
+              </div>
+              <div className="font-size-preview">
+                Preview: <span style={{ fontSize: `${fontSize}%` }}>Aa</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="setting-item">
+            <div className="setting-label">
+              <span>📐 Lebar Sidebar</span>
+              <p>Atur lebar sidebar navigasi</p>
+            </div>
+            <div className="button-group">
+              <button
+                className={`option-btn ${
+                  sidebarWidth === "narrow" ? "active" : ""
+                }`}
+                onClick={() => setSidebarWidth("narrow")}
+              >
+                Sempit
+              </button>
+              <button
+                className={`option-btn ${
+                  sidebarWidth === "normal" ? "active" : ""
+                }`}
+                onClick={() => setSidebarWidth("normal")}
+              >
+                Normal
+              </button>
+              <button
+                className={`option-btn ${
+                  sidebarWidth === "wide" ? "active" : ""
+                }`}
+                onClick={() => setSidebarWidth("wide")}
+              >
+                Lebar
+              </button>
+            </div>
+          </div>
+
+          <div className="setting-item">
+            <div className="setting-label">
+              <span>📦 Jarak Konten</span>
+              <p>Atur jarak antar elemen (padding/margin)</p>
+            </div>
+            <div className="button-group">
+              <button
+                className={`option-btn ${
+                  contentSpacing === "compact" ? "active" : ""
+                }`}
+                onClick={() => setContentSpacing("compact")}
+              >
+                Padat
+              </button>
+              <button
+                className={`option-btn ${
+                  contentSpacing === "normal" ? "active" : ""
+                }`}
+                onClick={() => setContentSpacing("normal")}
+              >
+                Normal
+              </button>
+              <button
+                className={`option-btn ${
+                  contentSpacing === "comfortable" ? "active" : ""
+                }`}
+                onClick={() => setContentSpacing("comfortable")}
+              >
+                Nyaman
+              </button>
+            </div>
           </div>
 
           <div className="setting-item">
