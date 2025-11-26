@@ -116,6 +116,23 @@ async def upload_file(
                 detail=f"Validation errors: {' | '.join(all_errors)}"
             )
         
+        # Check if data already exists for this month/year/unit and delete first
+        existing_count = db.query(Pegawai).filter(
+            Pegawai.month == month,
+            Pegawai.year == year,
+            Pegawai.unit == unit
+        ).count()
+        
+        if existing_count > 0:
+            # Delete existing data for this month/year/unit
+            logger.info(f"Found {existing_count} existing records for {unit} {month}/{year}. Replacing...")
+            db.query(Pegawai).filter(
+                Pegawai.month == month,
+                Pegawai.year == year,
+                Pegawai.unit == unit
+            ).delete()
+            db.flush()  # Flush delete before adding new records
+        
         # Store validated data in database
         logger.info(f"Storing {len(records)} records to database")
         stored_count = 0
@@ -150,22 +167,6 @@ async def upload_file(
                     status_code=400,
                     detail=f"Error storing employee {employee.get('NIP')}: {str(e)}"
                 )
-        
-        # Check if data already exists for this month/year/unit
-        existing_count = db.query(Pegawai).filter(
-            Pegawai.month == month,
-            Pegawai.year == year,
-            Pegawai.unit == unit
-        ).count()
-        
-        if existing_count > 0:
-            # Delete existing data for this month/year/unit
-            logger.info(f"Found {existing_count} existing records for {unit} {month}/{year}. Replacing...")
-            db.query(Pegawai).filter(
-                Pegawai.month == month,
-                Pegawai.year == year,
-                Pegawai.unit == unit
-            ).delete()
         
         # Commit all changes
         try:
