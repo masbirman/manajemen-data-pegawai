@@ -141,7 +141,7 @@ function LandingPage({ onLoginSuccess }) {
             >
               <img
                 src={settings.illustration_url.replace(
-                  "http://localhost:3000",
+                  /http:\/\/localhost:\d+/,
                   process.env.REACT_APP_API_URL || "http://localhost:8000"
                 )}
                 alt="Illustration"
