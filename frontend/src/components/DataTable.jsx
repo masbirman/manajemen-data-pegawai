@@ -42,6 +42,7 @@ function DataTable({
   const [activeUnit, setActiveUnit] = useState(unit || defaultUnit);
   const [selectedMonth, setSelectedMonth] = useState(month);
   const [selectedYear, setSelectedYear] = useState(year);
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [updateMessage, setUpdateMessage] = useState(null);
   const gridRef = useRef();
 
@@ -405,7 +406,7 @@ function DataTable({
     []
   );
 
-  // Filter data by month, year, and active unit
+  // Filter data by month, year, status, and active unit
   const filteredData = useMemo(() => {
     if (!data || data.length === 0) return [];
 
@@ -413,25 +414,34 @@ function DataTable({
     // because data already includes departed employees from previous month
     if (!isArchive) {
       return data.filter((row) => {
-        // Only filter by unit
+        // Only filter by unit and status
         const matchUnit = activeUnit === "Semua" || row.unit === activeUnit;
+        const matchStatus = !selectedStatus || row.status === selectedStatus;
 
         // IMPORTANT: Only show changes, hide "Aktif" (unchanged) employees
         const hasChange = row.status !== "Aktif";
 
-        return matchUnit && hasChange;
+        return matchUnit && hasChange && matchStatus;
       });
     }
 
-    // For archive view, filter by month/year/unit (show all including "Aktif")
+    // For archive view, filter by month/year/unit/status (show all including "Aktif")
     return data.filter((row) => {
       const matchMonth = !selectedMonth || row.month === selectedMonth;
       const matchYear = !selectedYear || row.year === selectedYear;
       const matchUnit = activeUnit === "Semua" || row.unit === activeUnit;
+      const matchStatus = !selectedStatus || row.status === selectedStatus;
 
-      return matchMonth && matchYear && matchUnit;
+      return matchMonth && matchYear && matchUnit && matchStatus;
     });
-  }, [data, selectedMonth, selectedYear, activeUnit, isArchive]);
+  }, [
+    data,
+    selectedMonth,
+    selectedYear,
+    activeUnit,
+    selectedStatus,
+    isArchive,
+  ]);
 
   // Row styling based on status
   const getRowStyle = (params) => {
@@ -677,7 +687,7 @@ function DataTable({
         )}
       </div>
 
-      {/* Month/Year Filters */}
+      {/* Month/Year/Status Filters */}
       <div className="period-filters">
         <div className="filter-group-inline">
           <label>Bulan:</label>
@@ -712,6 +722,22 @@ function DataTable({
                 {yearOption}
               </option>
             ))}
+          </select>
+        </div>
+
+        <div className="filter-group-inline">
+          <label>Status:</label>
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+          >
+            <option value="">Semua Status</option>
+            <option value="Aktif">Aktif</option>
+            <option value="Masuk">Masuk</option>
+            <option value="Keluar">Keluar</option>
+            <option value="Pensiun">Pensiun</option>
+            <option value="Pindah">Pindah</option>
+            <option value="Rekening Berbeda">Rekening Berbeda</option>
           </select>
         </div>
       </div>
