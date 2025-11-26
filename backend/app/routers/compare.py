@@ -106,48 +106,9 @@ async def compare_data(
                 Pegawai.manual_override == 0  # Only update if not manually overridden
             ).update({'status': 'Aktif'})
         
-        # Save departed employees to current month database with status "Keluar"
-        # This ensures Dashboard can show all statuses correctly
-        from app.services.month_utils import get_previous_month
-        prev_month, prev_year = get_previous_month(month, year)
-        
-        for emp_dict in comparison_result.departed_employees:
-            # Check if record already exists in current month (e.g., from manual override)
-            existing = db.query(Pegawai).filter(
-                Pegawai.nip == emp_dict['nip'],
-                Pegawai.month == month,
-                Pegawai.year == year,
-                Pegawai.unit == unit
-            ).first()
-            
-            if not existing:
-                # Get full employee data from previous month
-                prev_employee = db.query(Pegawai).filter(
-                    Pegawai.nip == emp_dict['nip'],
-                    Pegawai.month == prev_month,
-                    Pegawai.year == prev_year,
-                    Pegawai.unit == unit
-                ).first()
-                
-                if prev_employee:
-                    # Create new record in current month with status "Keluar"
-                    new_departed = Pegawai(
-                        nip=prev_employee.nip,
-                        nama=prev_employee.nama,
-                        nik=prev_employee.nik,
-                        npwp=prev_employee.npwp,
-                        tgl_lahir=prev_employee.tgl_lahir,
-                        kode_bank=prev_employee.kode_bank,
-                        nama_bank=prev_employee.nama_bank,
-                        nomor_rekening=prev_employee.nomor_rekening,
-                        unit=prev_employee.unit,
-                        month=month,
-                        year=year,
-                        status='Keluar',
-                        manual_override=0
-                    )
-                    db.add(new_departed)
-                    logger.info(f"Added departed employee {prev_employee.nip} to {month}/{year} with status Keluar")
+        # NOTE: Departed employees are NOT saved to current month database
+        # They only exist in previous month and are shown in comparison view
+        # This keeps the current month data accurate (only active employees)
         
         db.commit()
         logger.info("Database updated successfully")
