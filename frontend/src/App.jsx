@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import Layout from "./components/Layout";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import MainLayout from "./layout/MainLayout";
 import Dashboard from "./components/Dashboard";
 import FileUpload from "./components/FileUpload";
 import ComparisonView from "./components/ComparisonView";
@@ -520,27 +522,72 @@ function App() {
     }
   };
 
+  // Create MUI theme
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: "#5B8DEF",
+        lighter: "#E3F2FD",
+      },
+      secondary: {
+        main: "#6C757D",
+      },
+      text: {
+        primary: "#2C3E50",
+        secondary: "#8898AA",
+      },
+      background: {
+        default: "#F5F5F5",
+        paper: "#FFFFFF",
+      },
+      divider: "#E0E0E0",
+    },
+    typography: {
+      fontFamily:
+        '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      h6: {
+        fontSize: "1rem",
+        fontWeight: 600,
+      },
+      body2: {
+        fontSize: "0.875rem",
+      },
+      caption: {
+        fontSize: "0.75rem",
+      },
+    },
+    shape: {
+      borderRadius: 8,
+    },
+    customShadows: {
+      z1: "0 1px 3px rgba(0,0,0,0.08)",
+    },
+  });
+
   return (
     <ErrorBoundary>
-      <Layout
-        activeMenu={activeMenu}
-        onMenuChange={setActiveMenu}
-        currentUser={currentUser}
-        onLogout={handleLogout}
-        hasPermission={hasPermission}
-      >
-        {renderContent()}
-      </Layout>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <MainLayout
+          activeMenu={activeMenu}
+          onMenuChange={setActiveMenu}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          hasPermission={hasPermission}
+        >
+          {renderContent()}
+        </MainLayout>
 
-      {/* Notification System */}
-      {notification && (
-        <Notification
-          message={notification.message}
-          type={notification.type}
-          onClose={hideNotification}
-          duration={notification.duration}
-        />
-      )}
+        {/* Notification System */}
+        {notification && (
+          <Notification
+            message={notification.message}
+            type={notification.type}
+            onClose={hideNotification}
+            duration={notification.duration}
+          />
+        )}
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }
