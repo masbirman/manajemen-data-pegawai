@@ -48,13 +48,13 @@ function Settings() {
     localStorage.getItem("darkMode") === "true"
   );
   const [fontSize, setFontSize] = useState(
-    localStorage.getItem("fontSize") || "100"
+    localStorage.getItem("fontSize") || "85"
   );
   const [sidebarWidth, setSidebarWidth] = useState(
-    localStorage.getItem("sidebarWidth") || "normal"
+    localStorage.getItem("sidebarWidth") || "compact"
   );
   const [contentSpacing, setContentSpacing] = useState(
-    localStorage.getItem("contentSpacing") || "normal"
+    localStorage.getItem("contentSpacing") || "compact"
   );
   const [message, setMessage] = useState(null);
 
@@ -106,13 +106,14 @@ function Settings() {
   useEffect(() => {
     // Apply sidebar width
     const widths = {
+      compact: "160px",
       narrow: "180px",
-      normal: "250px",
-      wide: "320px",
+      normal: "220px",
+      wide: "280px",
     };
     document.documentElement.style.setProperty(
       "--sidebar-width",
-      widths[sidebarWidth]
+      widths[sidebarWidth] || "160px"
     );
   }, [sidebarWidth]);
 
@@ -370,12 +371,12 @@ function Settings() {
           <div className="setting-item">
             <div className="setting-label">
               <span>📏 Ukuran Font</span>
-              <p>Sesuaikan ukuran teks di seluruh aplikasi</p>
+              <p>Sesuaikan ukuran teks (13px = 85%, Recommended)</p>
             </div>
             <div className="font-size-control">
               <input
                 type="range"
-                min="80"
+                min="75"
                 max="120"
                 step="5"
                 value={fontSize}
@@ -383,7 +384,9 @@ function Settings() {
                 className="font-size-slider"
               />
               <div className="font-size-labels">
+                <span className={fontSize === "75" ? "active" : ""}>75%</span>
                 <span className={fontSize === "80" ? "active" : ""}>80%</span>
+                <span className={fontSize === "85" ? "active" : ""}>85%</span>
                 <span className={fontSize === "90" ? "active" : ""}>90%</span>
                 <span className={fontSize === "100" ? "active" : ""}>100%</span>
                 <span className={fontSize === "110" ? "active" : ""}>110%</span>
@@ -401,6 +404,14 @@ function Settings() {
               <p>Atur lebar sidebar navigasi</p>
             </div>
             <div className="button-group">
+              <button
+                className={`option-btn ${
+                  sidebarWidth === "compact" ? "active" : ""
+                }`}
+                onClick={() => setSidebarWidth("compact")}
+              >
+                Compact
+              </button>
               <button
                 className={`option-btn ${
                   sidebarWidth === "narrow" ? "active" : ""
