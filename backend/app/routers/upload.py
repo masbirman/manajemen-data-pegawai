@@ -130,8 +130,9 @@ async def upload_file(
                 Pegawai.month == month,
                 Pegawai.year == year,
                 Pegawai.unit == unit
-            ).delete()
-            db.flush()  # Flush delete before adding new records
+            ).delete(synchronize_session=False)
+            db.commit()  # Commit delete before adding new records
+            logger.info(f"Deleted {existing_count} existing records")
         
         # Store validated data in database
         logger.info(f"Storing {len(records)} records to database")
