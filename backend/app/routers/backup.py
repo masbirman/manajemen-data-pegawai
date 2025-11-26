@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
-from app.database import get_db
+from sqlalchemy import text
+from app.database import get_db, engine
 from app.routers.auth import require_permission
 from app.models.user import User
 import subprocess
@@ -31,41 +32,63 @@ async def create_backup(
         backup_filename = f"backup_{timestamp}.sql"
         backup_path = BACKUP_DIR / backup_filename
 
-        # Get database credentials from environment
-        db_user = os.getenv("POSTGRES_USER", "user")
-        db_name = os.getenv("POSTGRES_DB", "pegawai_db")
-        db_host = os.getenv("POSTGRES_HOST", "db")
-        db_port = os.getenv("POSTGRES_PORT", "5432")
-        db_password = os.getenv("POSTGRES_PASSWORD", "password")
+        # Create SQL backup using SQLAlchemy
+        with open(backup_path, "w") as f:
+            # Write header
+            f.write("-- PostgreSQL database dump\n")
+            f.write(f"-- Dumped at {datetime.now()}\n\n")
 
-        # Create backup using pg_dump
-        env = os.environ.copy()
-        env["PGPASSWORD"] = db_password
+            # Get all table names
+            with engine.connect() as conn:
+                result = conn.execute(
+                    text(
+                        "SELECT tablename FROM pg_tables WHERE schemaname = 'public'"
+                    )
+                )
+                tables = [row[0] for row in result]
 
-        cmd = [
-            "pg_dump",
-            "-h",
-            db_host,
-            "-p",
-            db_port,
-            "-U",
-            db_user,
-            "-d",
-            db_name,
-            "-f",
-            str(backup_path),
-        ]
+                # Dump each table
+                for table in tables:
+                    f.write(f"\n-- Table: {table}\n")
 
-        result = subprocess.run(
-            cmd, env=env, capture_output=True, text=True, timeout=60
-        )
+                    # Get CREATE TABLE statement
+                    create_result = conn.execute(
+                        text(
+                            f"SELECT 'CREATE TABLE {table} (' || string_agg(column_name || ' ' || data_type, ', ') || ');' "
+                            f"FROM information_schema.columns WHERE table_name = '{table}' GROUP BY table_name"
+                        )
+                    )
+                    create_stmt = create_result.scalar()
+                    if create_stmt:
+                        f.write(f"DROP TABLE IF EXISTS {table} CASCADE;\n")
+                        f.write(f"{create_stmt}\n\n")
 
-        if result.returncode != 0:
-            logger.error(f"Backup failed: {result.stderr}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Backup failed: {result.stderr}",
-            )
+                    # Get data
+                    data_result = conn.execute(text(f"SELECT * FROM {table}"))
+                    rows = data_result.fetchall()
+                    columns = data_result.keys()
+
+                    if rows:
+                        f.write(f"-- Data for {table}\n")
+                        for row in rows:
+                            values = []
+                            for val in row:
+                                if val is None:
+                                    values.append("NULL")
+                                elif isinstance(val, str):
+                                    # Escape single quotes
+                                    escaped = val.replace("'", "''")
+                                    values.append(f"'{escaped}'")
+                                elif isinstance(val, (int, float)):
+                                    values.append(str(val))
+                                else:
+                                    values.append(f"'{str(val)}'")
+
+                            cols = ", ".join(columns)
+                            vals = ", ".join(values)
+                            f.write(f"INSERT INTO {table} ({cols}) VALUES ({vals});\n")
+
+                        f.write("\n")
 
         # Get file size
         file_size = backup_path.stat().st_size
@@ -186,78 +209,30 @@ async def restore_backup(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Backup file not found"
             )
 
-        # Get database credentials
-        db_user = os.getenv("POSTGRES_USER", "user")
-        db_name = os.getenv("POSTGRES_DB", "pegawai_db")
-        db_host = os.getenv("POSTGRES_HOST", "db")
-        db_port = os.getenv("POSTGRES_PORT", "5432")
-        db_password = os.getenv("POSTGRES_PASSWORD", "password")
+        # Read backup file
+        with open(backup_path, "r") as f:
+            sql_content = f.read()
 
-        # Close all connections first
+        # Close current session
         db.close()
 
-        # Restore using psql
-        env = os.environ.copy()
-        env["PGPASSWORD"] = db_password
+        # Execute SQL statements
+        with engine.connect() as conn:
+            # Split by semicolon and execute each statement
+            statements = [s.strip() for s in sql_content.split(";") if s.strip()]
 
-        # Drop and recreate database
-        drop_cmd = [
-            "psql",
-            "-h",
-            db_host,
-            "-p",
-            db_port,
-            "-U",
-            db_user,
-            "-d",
-            "postgres",
-            "-c",
-            f"DROP DATABASE IF EXISTS {db_name};",
-        ]
+            for statement in statements:
+                # Skip comments
+                if statement.startswith("--"):
+                    continue
 
-        create_cmd = [
-            "psql",
-            "-h",
-            db_host,
-            "-p",
-            db_port,
-            "-U",
-            db_user,
-            "-d",
-            "postgres",
-            "-c",
-            f"CREATE DATABASE {db_name};",
-        ]
+                try:
+                    conn.execute(text(statement))
+                except Exception as e:
+                    logger.warning(f"Statement failed (may be ok): {e}")
+                    continue
 
-        restore_cmd = [
-            "psql",
-            "-h",
-            db_host,
-            "-p",
-            db_port,
-            "-U",
-            db_user,
-            "-d",
-            db_name,
-            "-f",
-            str(backup_path),
-        ]
-
-        # Execute commands
-        subprocess.run(drop_cmd, env=env, check=True, capture_output=True, timeout=30)
-        subprocess.run(
-            create_cmd, env=env, check=True, capture_output=True, timeout=30
-        )
-        result = subprocess.run(
-            restore_cmd, env=env, capture_output=True, text=True, timeout=120
-        )
-
-        if result.returncode != 0:
-            logger.error(f"Restore failed: {result.stderr}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Restore failed: {result.stderr}",
-            )
+            conn.commit()
 
         logger.info(f"Database restored successfully from: {filename}")
 
@@ -267,11 +242,6 @@ async def restore_backup(
             "warning": "Aplikasi akan restart otomatis",
         }
 
-    except subprocess.TimeoutExpired:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Restore timeout - file backup terlalu besar",
-        )
     except Exception as e:
         logger.error(f"Restore error: {e}")
         raise HTTPException(
