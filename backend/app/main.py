@@ -98,6 +98,10 @@ app.include_router(admin.router)
 app.include_router(archive.router)
 app.include_router(update.router)
 
+# Import backup router
+from app.routers import backup
+app.include_router(backup.router)
+
 
 @app.on_event("startup")
 async def startup_event():

@@ -118,6 +118,35 @@ def get_superadmin_user(current_user: User = Depends(get_current_active_user)):
     return current_user
 
 
+def require_permission(permission: str):
+    """
+    Dependency to check if user has specific permission.
+    Superadmin always has all permissions.
+    """
+    def permission_checker(
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_db)
+    ):
+        # Superadmin has all permissions
+        if current_user.role == 'superadmin':
+            return current_user
+        
+        # Check role permissions
+        role_perm = db.query(RolePermission).filter(
+            RolePermission.role == current_user.role
+        ).first()
+        
+        if not role_perm or permission not in role_perm.get_permissions():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"You don't have permission: {permission}"
+            )
+        
+        return current_user
+    
+    return permission_checker
+
+
 @router.post("/login", response_model=Token)
 async def login(username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     """
@@ -380,6 +409,7 @@ AVAILABLE_PERMISSIONS = [
     'archive',        # View archive
     'download',       # Download Excel
     'edit_status',    # Edit employee status (manual override)
+    'manage_backup',  # Backup and restore database
 ]
 
 
@@ -472,7 +502,7 @@ async def init_superadmin(db: Session = Depends(get_db)):
         
         # Create default permissions for operator and viewer
         operator_perm = RolePermission(role='operator')
-        operator_perm.set_permissions(['dashboard', 'upload', 'compare', 'archive', 'download', 'edit_status'])
+        operator_perm.set_permissions(['dashboard', 'upload', 'compare', 'archive', 'download', 'edit_status', 'manage_backup'])
         db.add(operator_perm)
         
         viewer_perm = RolePermission(role='viewer')
@@ -490,7 +520,7 @@ async def init_superadmin(db: Session = Depends(get_db)):
             "password": "superadmin123",
             "note": "Please change the password immediately!",
             "default_permissions": {
-                "operator": ['dashboard', 'upload', 'compare', 'archive', 'download', 'edit_status'],
+                "operator": ['dashboard', 'upload', 'compare', 'archive', 'download', 'edit_status', 'manage_backup'],
                 "viewer": ['dashboard', 'archive', 'download']
             }
         }

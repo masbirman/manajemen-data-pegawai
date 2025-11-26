@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { getAvailableMonths, deleteData } from "../api/api";
+import BackupManager from "./BackupManager";
 import "./AdminPanel.css";
 
 function AdminPanel() {
+  const [activeTab, setActiveTab] = useState("data");
   const [months, setMonths] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -121,119 +123,147 @@ function AdminPanel() {
   return (
     <div className="admin-panel-container">
       <div className="admin-panel">
-        <h3>Kelola Data</h3>
+        <h3>Admin Panel</h3>
 
-        {/* Branding Section */}
-        <div className="branding-section">
-          <h4>Pengaturan Branding</h4>
-
-          {/* Title & Tagline */}
-          <div className="title-form">
-            <div className="form-group">
-              <label htmlFor="app-title">Judul Aplikasi:</label>
-              <input
-                type="text"
-                id="app-title"
-                value={appTitle}
-                onChange={(e) => setAppTitle(e.target.value)}
-                placeholder="Contoh: Data Pegawai"
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="app-tagline">Tagline:</label>
-              <input
-                type="text"
-                id="app-tagline"
-                value={appTagline}
-                onChange={(e) => setAppTagline(e.target.value)}
-                placeholder="Contoh: Sistem Perbandingan"
-              />
-            </div>
-            <button className="update-title-button" onClick={handleTitleUpdate}>
-              💾 Simpan Perubahan
-            </button>
-            {titleMessage && (
-              <div className={`title-message ${titleMessage.type}`}>
-                {titleMessage.text}
-              </div>
-            )}
-          </div>
-
-          {/* Logo Upload */}
-          <div className="logo-upload-form">
-            <label className="form-label">Logo Aplikasi:</label>
-            <input
-              type="file"
-              id="logo-upload"
-              accept="image/*"
-              onChange={handleLogoUpload}
-              style={{ display: "none" }}
-            />
-            <label htmlFor="logo-upload" className="logo-upload-button">
-              📷 Pilih Logo
-            </label>
-            {logoMessage && (
-              <span className={`logo-message ${logoMessage.type}`}>
-                {logoMessage.text}
-              </span>
-            )}
-            <p className="logo-hint">
-              Format: PNG, JPG, atau SVG. Ukuran maksimal: 2MB
-            </p>
-          </div>
+        {/* Tabs */}
+        <div className="admin-tabs">
+          <button
+            className={`admin-tab ${activeTab === "data" ? "active" : ""}`}
+            onClick={() => setActiveTab("data")}
+          >
+            📊 Kelola Data
+          </button>
+          <button
+            className={`admin-tab ${activeTab === "backup" ? "active" : ""}`}
+            onClick={() => setActiveTab("backup")}
+          >
+            💾 Backup & Restore
+          </button>
         </div>
 
-        {message && (
-          <div className={`admin-message ${message.type}`}>{message.text}</div>
-        )}
+        {/* Tab Content */}
+        {activeTab === "backup" ? (
+          <BackupManager />
+        ) : (
+          <div className="data-management">
+            {/* Branding Section */}
+            <div className="branding-section">
+              <h4>Pengaturan Branding</h4>
 
-        {loading && <div className="admin-loading">Loading...</div>}
+              {/* Title & Tagline */}
+              <div className="title-form">
+                <div className="form-group">
+                  <label htmlFor="app-title">Judul Aplikasi:</label>
+                  <input
+                    type="text"
+                    id="app-title"
+                    value={appTitle}
+                    onChange={(e) => setAppTitle(e.target.value)}
+                    placeholder="Contoh: Data Pegawai"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="app-tagline">Tagline:</label>
+                  <input
+                    type="text"
+                    id="app-tagline"
+                    value={appTagline}
+                    onChange={(e) => setAppTagline(e.target.value)}
+                    placeholder="Contoh: Sistem Perbandingan"
+                  />
+                </div>
+                <button
+                  className="update-title-button"
+                  onClick={handleTitleUpdate}
+                >
+                  💾 Simpan Perubahan
+                </button>
+                {titleMessage && (
+                  <div className={`title-message ${titleMessage.type}`}>
+                    {titleMessage.text}
+                  </div>
+                )}
+              </div>
 
-        {!loading && months.length === 0 && (
-          <p className="no-data">Tidak ada data tersimpan</p>
-        )}
+              {/* Logo Upload */}
+              <div className="logo-upload-form">
+                <label className="form-label">Logo Aplikasi:</label>
+                <input
+                  type="file"
+                  id="logo-upload"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  style={{ display: "none" }}
+                />
+                <label htmlFor="logo-upload" className="logo-upload-button">
+                  📷 Pilih Logo
+                </label>
+                {logoMessage && (
+                  <span className={`logo-message ${logoMessage.type}`}>
+                    {logoMessage.text}
+                  </span>
+                )}
+                <p className="logo-hint">
+                  Format: PNG, JPG, atau SVG. Ukuran maksimal: 2MB
+                </p>
+              </div>
+            </div>
 
-        {!loading && months.length > 0 && (
-          <div className="months-list">
-            <table>
-              <thead>
-                <tr>
-                  <th>Unit</th>
-                  <th>Bulan</th>
-                  <th>Tahun</th>
-                  <th>Jumlah Records</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {months.map((item) => {
-                  const monthName = new Date(
-                    item.year,
-                    item.month - 1,
-                    1
-                  ).toLocaleString("id-ID", { month: "long" });
-                  return (
-                    <tr key={`${item.year}-${item.month}-${item.unit}`}>
-                      <td>{item.unit}</td>
-                      <td>{monthName}</td>
-                      <td>{item.year}</td>
-                      <td>{item.count}</td>
-                      <td>
-                        <button
-                          className="delete-button"
-                          onClick={() =>
-                            handleDelete(item.month, item.year, item.unit)
-                          }
-                          disabled={loading}
-                        >
-                          🗑️ Hapus
-                        </button>
-                      </td>
+            {message && (
+              <div className={`admin-message ${message.type}`}>
+                {message.text}
+              </div>
+            )}
+
+            {loading && <div className="admin-loading">Loading...</div>}
+
+            {!loading && months.length === 0 && (
+              <p className="no-data">Tidak ada data tersimpan</p>
+            )}
+
+            {!loading && months.length > 0 && (
+              <div className="months-list">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Unit</th>
+                      <th>Bulan</th>
+                      <th>Tahun</th>
+                      <th>Jumlah Records</th>
+                      <th>Aksi</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {months.map((item) => {
+                      const monthName = new Date(
+                        item.year,
+                        item.month - 1,
+                        1
+                      ).toLocaleString("id-ID", { month: "long" });
+                      return (
+                        <tr key={`${item.year}-${item.month}-${item.unit}`}>
+                          <td>{item.unit}</td>
+                          <td>{monthName}</td>
+                          <td>{item.year}</td>
+                          <td>{item.count}</td>
+                          <td>
+                            <button
+                              className="delete-button"
+                              onClick={() =>
+                                handleDelete(item.month, item.year, item.unit)
+                              }
+                              disabled={loading}
+                            >
+                              🗑️ Hapus
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>
