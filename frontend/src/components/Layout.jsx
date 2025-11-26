@@ -30,10 +30,10 @@ function Layout({
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
-          ml: { sm: `${DRAWER_WIDTH}px` },
           bgcolor: "#f5f5f5",
           minHeight: "100vh",
+          marginLeft: `${DRAWER_WIDTH}px`,
+          width: `calc(100% - ${DRAWER_WIDTH}px)`,
         }}
       >
         {children}
