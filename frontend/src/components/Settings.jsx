@@ -36,8 +36,13 @@ function Settings() {
 
       const newSettings = {
         selectedFont,
-        fontSize: parseInt(fontSize),
+        fontSize: String(fontSize),
         darkMode,
+        // Include required fields with defaults
+        sidebarWidth: "normal",
+        contentSpacing: "normal",
+        themeColor: "blue",
+        accentColor: "blue",
       };
 
       // Save to API
