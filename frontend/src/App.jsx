@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { SettingsProvider } from "./contexts/SettingsContext";
 import ThemeCustomization from "./themes";
 import DashboardLayout from "./layout/Dashboard";
 import Dashboard from "./components/Dashboard";
@@ -37,20 +38,16 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="error-boundary">
           <h2>Something went wrong</h2>
-          <p>
-            An unexpected error occurred. Please refresh the page and try again.
-          </p>
+          <p>An unexpected error occurred. Please refresh the page.</p>
           <button onClick={() => window.location.reload()}>Refresh Page</button>
         </div>
       );
     }
-
     return this.props.children;
   }
 }
 
-function App() {
-  // Authentication state
+function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return !!localStorage.getItem("token");
   });
@@ -62,8 +59,6 @@ function App() {
     const saved = localStorage.getItem("permissions");
     return saved ? JSON.parse(saved) : [];
   });
-
-  // Load from localStorage on initial render
   const [comparisonResults, setComparisonResults] = useState(() => {
     const saved = localStorage.getItem("comparisonResults");
     return saved ? JSON.parse(saved) : null;
@@ -84,54 +79,18 @@ function App() {
   });
   const [activeMenu, setActiveMenu] = useState("dashboard");
 
-  // Notification system
   const { notification, showNotification, hideNotification } =
     useNotification();
 
-  // Listen for notification events from other components
   React.useEffect(() => {
     const handleShowNotification = (event) => {
       const { message, type } = event.detail;
       showNotification(message, type);
     };
 
-    const handleGlobalSettingsUpdate = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const API_BASE_URL = process.env.REACT_APP_API_URL;
-        const response = await fetch(`${API_BASE_URL}/app-settings`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          applyGlobalSettings(data.settings);
-        }
-      } catch (error) {
-        console.error("Failed to reload settings:", error);
-      }
-    };
-
-    const handleStorageChange = (e) => {
-      if (e.key === "settingsUpdateTrigger") {
-        handleGlobalSettingsUpdate();
-      }
-    };
-
     window.addEventListener("showNotification", handleShowNotification);
-    window.addEventListener(
-      "globalSettingsUpdated",
-      handleGlobalSettingsUpdate
-    );
-    window.addEventListener("storage", handleStorageChange);
-
     return () => {
       window.removeEventListener("showNotification", handleShowNotification);
-      window.removeEventListener(
-        "globalSettingsUpdated",
-        handleGlobalSettingsUpdate
-      );
-      window.removeEventListener("storage", handleStorageChange);
     };
   }, [showNotification]);
 
@@ -178,7 +137,6 @@ function App() {
       );
 
       const mergedResults = [...otherUnitsData, ...newResults];
-
       setComparisonResults(mergedResults);
       localStorage.setItem("comparisonResults", JSON.stringify(mergedResults));
 
@@ -191,12 +149,6 @@ function App() {
       setError(errorMessage);
       setComparisonResults(null);
       localStorage.removeItem("comparisonResults");
-
-      if (errorMessage.includes("No response from server")) {
-        setError(
-          "Cannot connect to server. Please ensure the backend is running."
-        );
-      }
     } finally {
       setLoading(false);
     }
@@ -208,30 +160,13 @@ function App() {
     setUserPermissions(permissions || []);
     localStorage.setItem("permissions", JSON.stringify(permissions || []));
 
-    try {
-      const token = localStorage.getItem("token");
-      const API_BASE_URL = process.env.REACT_APP_API_URL;
-      const response = await fetch(`${API_BASE_URL}/app-settings`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        applyGlobalSettings(data.settings);
-      }
-    } catch (error) {
-      console.error("Failed to load app settings:", error);
-    }
+    // Trigger settings reload
+    window.dispatchEvent(new CustomEvent("globalSettingsUpdated"));
 
     showNotification(
       `Selamat datang, ${user.full_name || user.username}!`,
       "success"
     );
-  };
-
-  const applyGlobalSettings = (settings) => {
-    if (!settings) return;
-    // Settings application logic here if needed
   };
 
   const hasPermission = (permission) => {
@@ -251,13 +186,8 @@ function App() {
     showNotification("Anda telah logout", "info");
   };
 
-  // Show landing page if not authenticated
   if (!isAuthenticated) {
-    return (
-      <ThemeCustomization>
-        <LandingPage onLoginSuccess={handleLoginSuccess} />
-      </ThemeCustomization>
-    );
+    return <LandingPage onLoginSuccess={handleLoginSuccess} />;
   }
 
   const renderContent = () => {
@@ -351,27 +281,37 @@ function App() {
   };
 
   return (
-    <ErrorBoundary>
-      <ThemeCustomization>
-        <DashboardLayout
-          activeMenu={activeMenu}
-          onMenuChange={setActiveMenu}
-          currentUser={currentUser}
-          onLogout={handleLogout}
-          hasPermission={hasPermission}
-        >
-          {renderContent()}
-        </DashboardLayout>
+    <>
+      <DashboardLayout
+        activeMenu={activeMenu}
+        onMenuChange={setActiveMenu}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        hasPermission={hasPermission}
+      >
+        {renderContent()}
+      </DashboardLayout>
 
-        {notification && (
-          <Notification
-            message={notification.message}
-            type={notification.type}
-            onClose={hideNotification}
-            duration={notification.duration}
-          />
-        )}
-      </ThemeCustomization>
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={hideNotification}
+          duration={notification.duration}
+        />
+      )}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <SettingsProvider>
+        <ThemeCustomization>
+          <AppContent />
+        </ThemeCustomization>
+      </SettingsProvider>
     </ErrorBoundary>
   );
 }

@@ -1,23 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useSettings } from "../contexts/SettingsContext";
 import "./Settings.css";
 
-const THEME_COLORS = {
-  blue: { name: "Biru", primary: "#1e3a8a", secondary: "#1e40af" },
-  green: { name: "Hijau", primary: "#065f46", secondary: "#047857" },
-  purple: { name: "Ungu", primary: "#5b21b6", secondary: "#6d28d9" },
-  red: { name: "Merah", primary: "#991b1b", secondary: "#b91c1c" },
-  dark: { name: "Hitam", primary: "#1f2937", secondary: "#374151" },
-  white: { name: "Putih", primary: "#ffffff", secondary: "#f3f4f6" },
-  gray: { name: "Abu-abu", primary: "#6b7280", secondary: "#9ca3af" },
-};
-
-const ACCENT_COLORS = {
-  blue: "#2563eb",
-  green: "#10b981",
-  orange: "#f59e0b",
-  red: "#ef4444",
-  purple: "#8b5cf6",
-};
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const FONTS = {
   inter: { name: "Inter", value: "'Inter', sans-serif" },
@@ -29,34 +14,15 @@ const FONTS = {
 };
 
 function Settings() {
-  const [itemsPerPage, setItemsPerPage] = useState(
-    localStorage.getItem("itemsPerPage") || "100"
-  );
-  const [defaultUnit, setDefaultUnit] = useState(
-    localStorage.getItem("defaultUnit") || "Dinas"
-  );
-  const [themeColor, setThemeColor] = useState(
-    localStorage.getItem("themeColor") || "blue"
-  );
-  const [accentColor, setAccentColor] = useState(
-    localStorage.getItem("accentColor") || "blue"
-  );
-  const [selectedFont, setSelectedFont] = useState(
-    localStorage.getItem("selectedFont") || "jakarta"
-  );
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("darkMode") === "true"
-  );
-  const [fontSize, setFontSize] = useState(
-    localStorage.getItem("fontSize") || "85"
-  );
-  const [sidebarWidth, setSidebarWidth] = useState(
-    localStorage.getItem("sidebarWidth") || "compact"
-  );
-  const [contentSpacing, setContentSpacing] = useState(
-    localStorage.getItem("contentSpacing") || "compact"
-  );
+  const { settings, updateSettings, resetSettings } = useSettings();
   const [message, setMessage] = useState(null);
+
+  // Local state for form
+  const [selectedFont, setSelectedFont] = useState(
+    settings.selectedFont || "inter"
+  );
+  const [fontSize, setFontSize] = useState(settings.fontSize || 100);
+  const [darkMode, setDarkMode] = useState(settings.darkMode || false);
 
   // Password change state
   const [currentPassword, setCurrentPassword] = useState("");
@@ -64,114 +30,45 @@ function Settings() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMessage, setPasswordMessage] = useState(null);
 
-  useEffect(() => {
-    // Apply theme colors
-    const theme = THEME_COLORS[themeColor];
-    document.documentElement.style.setProperty(
-      "--sidebar-primary",
-      theme.primary
-    );
-    document.documentElement.style.setProperty(
-      "--sidebar-secondary",
-      theme.secondary
-    );
-  }, [themeColor]);
-
-  useEffect(() => {
-    // Apply accent color
-    const accent = ACCENT_COLORS[accentColor];
-    document.documentElement.style.setProperty("--accent-color", accent);
-  }, [accentColor]);
-
-  useEffect(() => {
-    // Apply font
-    const font = FONTS[selectedFont];
-    document.documentElement.style.setProperty("--app-font", font.value);
-  }, [selectedFont]);
-
-  useEffect(() => {
-    // Apply dark mode
-    if (darkMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
-  }, [darkMode]);
-
-  useEffect(() => {
-    // Apply font size scale
-    document.documentElement.style.setProperty("--font-scale", fontSize / 100);
-  }, [fontSize]);
-
-  useEffect(() => {
-    // Apply sidebar width
-    const widths = {
-      compact: "160px",
-      narrow: "180px",
-      normal: "220px",
-      wide: "280px",
-    };
-    document.documentElement.style.setProperty(
-      "--sidebar-width",
-      widths[sidebarWidth] || "160px"
-    );
-  }, [sidebarWidth]);
-
-  useEffect(() => {
-    // Apply content spacing
-    const spacings = {
-      compact: "0.75",
-      normal: "1",
-      comfortable: "1.5",
-    };
-    document.documentElement.style.setProperty(
-      "--spacing-scale",
-      spacings[contentSpacing]
-    );
-  }, [contentSpacing]);
-
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
-      const API_BASE_URL =
-        process.env.REACT_APP_API_URL || "http://localhost:8000";
 
-      // Save global settings to database (Super Admin only)
+      const newSettings = {
+        selectedFont,
+        fontSize: parseInt(fontSize),
+        darkMode,
+      };
+
+      // Save to API
       const response = await fetch(`${API_BASE_URL}/app-settings`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          fontSize,
-          sidebarWidth,
-          contentSpacing,
-          themeColor,
-          accentColor,
-          selectedFont,
-          darkMode,
-        }),
+        body: JSON.stringify(newSettings),
       });
 
       if (!response.ok) {
         throw new Error("Failed to save settings");
       }
 
-      // Also save to localStorage for immediate effect
-      localStorage.setItem("itemsPerPage", itemsPerPage);
-      localStorage.setItem("defaultUnit", defaultUnit);
+      // Update context
+      updateSettings(newSettings);
+
+      // Trigger reload for theme changes
+      window.dispatchEvent(new CustomEvent("globalSettingsUpdated"));
 
       setMessage({
         type: "success",
-        text: "Pengaturan berhasil disimpan untuk semua user! Perubahan langsung diterapkan ke semua tab.",
+        text: "Pengaturan berhasil disimpan! Halaman akan di-refresh untuk menerapkan perubahan.",
       });
 
-      // Trigger global settings update in current tab
-      window.dispatchEvent(new CustomEvent("globalSettingsUpdated"));
-
-      // Broadcast to other tabs using localStorage event
-      localStorage.setItem("settingsUpdateTrigger", Date.now().toString());
+      // Reload page to apply theme changes
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       setMessage({
         type: "error",
@@ -185,63 +82,32 @@ function Settings() {
   const handleReset = async () => {
     try {
       const token = localStorage.getItem("token");
-      const API_BASE_URL =
-        process.env.REACT_APP_API_URL || "http://localhost:8000";
 
-      // Reset global settings in database
       const response = await fetch(`${API_BASE_URL}/app-settings/reset`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) {
         throw new Error("Failed to reset settings");
       }
 
+      // Reset context
+      resetSettings();
+
       // Reset local state
-      setItemsPerPage("100");
-      setDefaultUnit("Dinas");
-      setThemeColor("blue");
-      setAccentColor("blue");
-      setSelectedFont("jakarta");
+      setSelectedFont("inter");
+      setFontSize(100);
       setDarkMode(false);
-      setFontSize("100");
-      setSidebarWidth("normal");
-      setContentSpacing("normal");
-
-      localStorage.removeItem("itemsPerPage");
-      localStorage.removeItem("defaultUnit");
-
-      document.documentElement.style.setProperty(
-        "--sidebar-primary",
-        THEME_COLORS.blue.primary
-      );
-      document.documentElement.style.setProperty(
-        "--sidebar-secondary",
-        THEME_COLORS.blue.secondary
-      );
-      document.documentElement.style.setProperty(
-        "--accent-color",
-        ACCENT_COLORS.blue
-      );
-      document.documentElement.style.setProperty(
-        "--app-font",
-        FONTS.jakarta.value
-      );
-      document.documentElement.style.setProperty("--font-scale", 1);
-      document.documentElement.style.setProperty("--sidebar-width", "250px");
-      document.documentElement.style.setProperty("--spacing-scale", 1);
-      document.body.classList.remove("dark-mode");
 
       setMessage({
         type: "success",
-        text: "Pengaturan berhasil direset ke default untuk semua user!",
+        text: "Pengaturan berhasil direset! Halaman akan di-refresh.",
       });
 
-      // Trigger global settings update
-      window.dispatchEvent(new CustomEvent("globalSettingsUpdated"));
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       setMessage({
         type: "error",
@@ -276,22 +142,17 @@ function Settings() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${
-          process.env.REACT_APP_API_URL || "http://localhost:8000"
-        }/auth/change-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            current_password: currentPassword,
-            new_password: newPassword,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+        }),
+      });
 
       const data = await response.json();
 
@@ -371,197 +232,28 @@ function Settings() {
           <div className="setting-item">
             <div className="setting-label">
               <span>📏 Ukuran Font</span>
-              <p>Sesuaikan ukuran teks (13px = 85%, Recommended)</p>
+              <p>Sesuaikan ukuran teks ({fontSize}%)</p>
             </div>
             <div className="font-size-control">
               <input
                 type="range"
                 min="75"
-                max="120"
+                max="125"
                 step="5"
                 value={fontSize}
                 onChange={(e) => setFontSize(e.target.value)}
                 className="font-size-slider"
               />
               <div className="font-size-labels">
-                <span className={fontSize === "75" ? "active" : ""}>75%</span>
-                <span className={fontSize === "80" ? "active" : ""}>80%</span>
-                <span className={fontSize === "85" ? "active" : ""}>85%</span>
-                <span className={fontSize === "90" ? "active" : ""}>90%</span>
-                <span className={fontSize === "100" ? "active" : ""}>100%</span>
-                <span className={fontSize === "110" ? "active" : ""}>110%</span>
-                <span className={fontSize === "120" ? "active" : ""}>120%</span>
+                <span>75%</span>
+                <span>100%</span>
+                <span>125%</span>
               </div>
               <div className="font-size-preview">
-                Preview: <span style={{ fontSize: `${fontSize}%` }}>Aa</span>
+                Preview:{" "}
+                <span style={{ fontSize: `${fontSize}%` }}>Aa Bb Cc</span>
               </div>
             </div>
-          </div>
-
-          <div className="setting-item">
-            <div className="setting-label">
-              <span>📐 Lebar Sidebar</span>
-              <p>Atur lebar sidebar navigasi</p>
-            </div>
-            <div className="button-group">
-              <button
-                className={`option-btn ${
-                  sidebarWidth === "compact" ? "active" : ""
-                }`}
-                onClick={() => setSidebarWidth("compact")}
-              >
-                Compact
-              </button>
-              <button
-                className={`option-btn ${
-                  sidebarWidth === "narrow" ? "active" : ""
-                }`}
-                onClick={() => setSidebarWidth("narrow")}
-              >
-                Sempit
-              </button>
-              <button
-                className={`option-btn ${
-                  sidebarWidth === "normal" ? "active" : ""
-                }`}
-                onClick={() => setSidebarWidth("normal")}
-              >
-                Normal
-              </button>
-              <button
-                className={`option-btn ${
-                  sidebarWidth === "wide" ? "active" : ""
-                }`}
-                onClick={() => setSidebarWidth("wide")}
-              >
-                Lebar
-              </button>
-            </div>
-          </div>
-
-          <div className="setting-item">
-            <div className="setting-label">
-              <span>📦 Jarak Konten</span>
-              <p>Atur jarak antar elemen (padding/margin)</p>
-            </div>
-            <div className="button-group">
-              <button
-                className={`option-btn ${
-                  contentSpacing === "compact" ? "active" : ""
-                }`}
-                onClick={() => setContentSpacing("compact")}
-              >
-                Padat
-              </button>
-              <button
-                className={`option-btn ${
-                  contentSpacing === "normal" ? "active" : ""
-                }`}
-                onClick={() => setContentSpacing("normal")}
-              >
-                Normal
-              </button>
-              <button
-                className={`option-btn ${
-                  contentSpacing === "comfortable" ? "active" : ""
-                }`}
-                onClick={() => setContentSpacing("comfortable")}
-              >
-                Nyaman
-              </button>
-            </div>
-          </div>
-
-          <div className="setting-item">
-            <div className="setting-label">
-              <span>🎨 Warna Sidebar</span>
-              <p>Pilih warna tema sidebar</p>
-            </div>
-            <div className="color-options">
-              {Object.entries(THEME_COLORS).map(([key, value]) => (
-                <button
-                  key={key}
-                  className={`color-btn ${themeColor === key ? "active" : ""}`}
-                  style={{
-                    background:
-                      key === "white"
-                        ? `linear-gradient(135deg, ${value.primary}, ${value.secondary})`
-                        : `linear-gradient(135deg, ${value.primary}, ${value.secondary})`,
-                    border: key === "white" ? "2px solid #e5e7eb" : "none",
-                    color:
-                      key === "white" || key === "gray" ? "#1e3a8a" : "white",
-                  }}
-                  onClick={() => setThemeColor(key)}
-                  title={value.name}
-                >
-                  {themeColor === key && "✓"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="setting-item">
-            <div className="setting-label">
-              <span>✨ Warna Aksen</span>
-              <p>Warna untuk button dan highlight</p>
-            </div>
-            <div className="color-options">
-              {Object.entries(ACCENT_COLORS).map(([key, value]) => (
-                <button
-                  key={key}
-                  className={`color-btn ${accentColor === key ? "active" : ""}`}
-                  style={{ backgroundColor: value }}
-                  onClick={() => setAccentColor(key)}
-                >
-                  {accentColor === key && "✓"}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Data Display */}
-        <div className="settings-section">
-          <h3>📊 Tampilan Data</h3>
-
-          <div className="setting-item">
-            <div className="setting-label">
-              <span>📄 Baris per Halaman</span>
-              <p>Jumlah data yang ditampilkan per halaman</p>
-            </div>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(e.target.value)}
-              className="setting-select"
-            >
-              <option value="10">10 baris</option>
-              <option value="100">100 baris</option>
-              <option value="500">500 baris</option>
-              <option value="1000">1000 baris</option>
-              <option value="all">Semua</option>
-            </select>
-          </div>
-
-          <div className="setting-item">
-            <div className="setting-label">
-              <span>🏢 Unit Default</span>
-              <p>Unit yang dipilih saat membuka tabel</p>
-            </div>
-            <select
-              value={defaultUnit}
-              onChange={(e) => setDefaultUnit(e.target.value)}
-              className="setting-select"
-            >
-              <option value="Semua">Semua Unit</option>
-              <option value="Dinas">Dinas</option>
-              <option value="Cabdis Wil. 1">Cabdis Wil. 1</option>
-              <option value="Cabdis Wil. 2">Cabdis Wil. 2</option>
-              <option value="Cabdis Wil. 3">Cabdis Wil. 3</option>
-              <option value="Cabdis Wil. 4">Cabdis Wil. 4</option>
-              <option value="Cabdis Wil. 5">Cabdis Wil. 5</option>
-              <option value="Cabdis Wil. 6">Cabdis Wil. 6</option>
-              <option value="PPPK">PPPK</option>
-            </select>
           </div>
         </div>
 
@@ -631,92 +323,6 @@ function Settings() {
         <button className="reset-button" onClick={handleReset}>
           🔄 Reset ke Default
         </button>
-        <button
-          className="reset-button"
-          onClick={() => {
-            localStorage.clear();
-            window.location.reload();
-          }}
-          style={{ backgroundColor: "#ef4444" }}
-        >
-          🗑️ Clear All Data
-        </button>
-      </div>
-
-      {/* Test Notification Section */}
-      <div className="settings-section" style={{ marginTop: "24px" }}>
-        <h3>🔔 Test Notification System</h3>
-        <p style={{ marginBottom: "16px", color: "#666" }}>
-          Klik tombol di bawah untuk mencoba notification system
-        </p>
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
-        >
-          <button
-            className="test-notification-btn success"
-            onClick={() => {
-              window.dispatchEvent(
-                new CustomEvent("showNotification", {
-                  detail: {
-                    message: "Operasi berhasil! Data telah disimpan.",
-                    type: "success",
-                  },
-                })
-              );
-            }}
-          >
-            ✅ Success
-          </button>
-          <button
-            className="test-notification-btn error"
-            onClick={() => {
-              window.dispatchEvent(
-                new CustomEvent("showNotification", {
-                  detail: {
-                    message: "Terjadi kesalahan! Silakan coba lagi.",
-                    type: "error",
-                  },
-                })
-              );
-            }}
-          >
-            ❌ Error
-          </button>
-          <button
-            className="test-notification-btn warning"
-            onClick={() => {
-              window.dispatchEvent(
-                new CustomEvent("showNotification", {
-                  detail: {
-                    message: "Peringatan! Periksa kembali data Anda.",
-                    type: "warning",
-                  },
-                })
-              );
-            }}
-          >
-            ⚠️ Warning
-          </button>
-          <button
-            className="test-notification-btn info"
-            onClick={() => {
-              window.dispatchEvent(
-                new CustomEvent("showNotification", {
-                  detail: {
-                    message: "Informasi: Sistem akan maintenance besok.",
-                    type: "info",
-                  },
-                })
-              );
-            }}
-          >
-            ℹ️ Info
-          </button>
-        </div>
       </div>
     </div>
   );

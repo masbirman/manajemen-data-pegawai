@@ -14,15 +14,28 @@ import Palette from "./palette";
 import Typography from "./typography";
 import CustomShadows from "./shadows";
 import componentsOverride from "./overrides";
+import { useSettings } from "../contexts/SettingsContext";
 
 import { HEADER_HEIGHT } from "../config";
 
-// ==============================|| DEFAULT THEME - MAIN  ||============================== //
+// Font mapping
+const FONTS = {
+  inter: '"Inter", sans-serif',
+  jakarta: '"Plus Jakarta Sans", sans-serif',
+  poppins: '"Poppins", sans-serif',
+};
+
+// ==============================|| DEFAULT THEME - MAIN ||============================== //
 
 export default function ThemeCustomization({ children }) {
-  const theme = Palette("light", "default");
+  const { settings } = useSettings();
 
-  const themeTypography = Typography(`Inter var`);
+  const mode = settings.darkMode ? "dark" : "light";
+  const fontFamily = FONTS[settings.selectedFont] || FONTS.inter;
+  const fontScale = (settings.fontSize || 100) / 100;
+
+  const theme = Palette(mode, "default");
+  const themeTypography = Typography(fontFamily, fontScale);
   const themeCustomShadows = useMemo(() => CustomShadows(theme), [theme]);
 
   const themeOptions = useMemo(
