@@ -41,6 +41,10 @@ function MaintenancePage({ settings }) {
         <div className="maintenance-footer">
           <p>Terima kasih atas kesabaran Anda</p>
         </div>
+
+        <div className="admin-access-link">
+          <a href="/admin">🔐 Admin Access</a>
+        </div>
       </div>
     </div>
   );

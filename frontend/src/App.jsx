@@ -14,6 +14,7 @@ import LandingPageSettings from "./components/LandingPageSettings";
 import UserManagement from "./components/UserManagement";
 import MaintenanceSettings from "./components/MaintenanceSettings";
 import MaintenancePage from "./components/MaintenancePage";
+import AdminLogin from "./components/AdminLogin";
 import Notification from "./components/Notification";
 import { useNotification } from "./hooks/useNotification";
 import { getComparison } from "./api/api";
@@ -84,6 +85,9 @@ function AppContent() {
     return saved || null;
   });
   const [activeMenu, setActiveMenu] = useState("dashboard");
+  const [isAdminRoute, setIsAdminRoute] = useState(() => {
+    return window.location.pathname === "/admin";
+  });
 
   const { notification, showNotification, hideNotification } =
     useNotification();
@@ -105,6 +109,16 @@ function AppContent() {
     };
 
     checkMaintenance();
+  }, []);
+
+  // Handle /admin route changes
+  React.useEffect(() => {
+    const handleRouteChange = () => {
+      setIsAdminRoute(window.location.pathname === "/admin");
+    };
+
+    window.addEventListener("popstate", handleRouteChange);
+    return () => window.removeEventListener("popstate", handleRouteChange);
   }, []);
 
   React.useEffect(() => {
@@ -210,6 +224,23 @@ function AppContent() {
     setActiveMenu("dashboard");
     showNotification("Anda telah logout", "info");
   };
+
+  // Handle /admin route - always allow access for superadmin login
+  if (isAdminRoute && !isAuthenticated) {
+    return (
+      <AdminLogin
+        onLoginSuccess={(user, permissions) => {
+          handleLoginSuccess(user, permissions);
+          setIsAdminRoute(false);
+          window.history.pushState({}, "", "/");
+        }}
+        onBack={() => {
+          setIsAdminRoute(false);
+          window.history.pushState({}, "", "/");
+        }}
+      />
+    );
+  }
 
   // Show maintenance page if enabled (except for superadmin)
   if (!checkingMaintenance && maintenanceMode?.enabled) {
