@@ -49,6 +49,7 @@ export default function DashboardLayout({
           p: { xs: 1, sm: 3 },
           bgcolor: "secondary.lighter",
           minHeight: "100vh",
+          overflow: "auto",
         }}
       >
         <Toolbar sx={{ mt: "inherit", mb: "inherit" }} />
@@ -58,6 +59,7 @@ export default function DashboardLayout({
             minHeight: "calc(100vh - 124px)",
             display: "flex",
             flexDirection: "column",
+            pb: 3,
           }}
         >
           {children}
