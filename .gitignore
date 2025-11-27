@@ -30,3 +30,6 @@ backup*.sql
 
 # Logs
 *.log
+
+# Template files (reference only)
+able-pro-free-admin-dashboard-template-*/

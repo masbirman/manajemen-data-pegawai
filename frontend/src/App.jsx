@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
-import MainLayout from "./layout/MainLayout";
+import ThemeCustomization from "./themes";
+import DashboardLayout from "./layout/Dashboard";
 import Dashboard from "./components/Dashboard";
 import FileUpload from "./components/FileUpload";
 import ComparisonView from "./components/ComparisonView";
@@ -97,11 +96,9 @@ function App() {
     };
 
     const handleGlobalSettingsUpdate = async () => {
-      // Reload settings when Super Admin updates them
       try {
         const token = localStorage.getItem("token");
-        const API_BASE_URL =
-          process.env.REACT_APP_API_URL || "http://localhost:8000";
+        const API_BASE_URL = process.env.REACT_APP_API_URL;
         const response = await fetch(`${API_BASE_URL}/app-settings`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -115,10 +112,8 @@ function App() {
       }
     };
 
-    // Listen for localStorage changes from other tabs
     const handleStorageChange = (e) => {
       if (e.key === "settingsUpdateTrigger") {
-        // Settings updated in another tab, reload
         handleGlobalSettingsUpdate();
       }
     };
@@ -140,83 +135,21 @@ function App() {
     };
   }, [showNotification]);
 
-  // Load dark mode on mount
-  React.useEffect(() => {
-    const darkMode = localStorage.getItem("darkMode") === "true";
-    if (darkMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
-
-    // Load theme colors
-    const themeColor = localStorage.getItem("themeColor") || "blue";
-    const THEME_COLORS = {
-      blue: { primary: "#1e3a8a", secondary: "#1e40af" },
-      green: { primary: "#065f46", secondary: "#047857" },
-      purple: { primary: "#5b21b6", secondary: "#6d28d9" },
-      red: { primary: "#991b1b", secondary: "#b91c1c" },
-      dark: { primary: "#1f2937", secondary: "#374151" },
-      white: { primary: "#ffffff", secondary: "#f3f4f6" },
-      gray: { primary: "#6b7280", secondary: "#9ca3af" },
-    };
-    const theme = THEME_COLORS[themeColor];
-    if (theme) {
-      document.documentElement.style.setProperty(
-        "--sidebar-primary",
-        theme.primary
-      );
-      document.documentElement.style.setProperty(
-        "--sidebar-secondary",
-        theme.secondary
-      );
-    }
-
-    // Load accent color
-    const accentColor = localStorage.getItem("accentColor") || "blue";
-    const ACCENT_COLORS = {
-      blue: "#2563eb",
-      green: "#10b981",
-      orange: "#f59e0b",
-      red: "#ef4444",
-      purple: "#8b5cf6",
-    };
-    const accent = ACCENT_COLORS[accentColor];
-    if (accent) {
-      document.documentElement.style.setProperty("--accent-color", accent);
-    }
-
-    // Load font
-    const selectedFont = localStorage.getItem("selectedFont") || "jakarta";
-    const FONTS = {
-      inter: "'Inter', sans-serif",
-      jakarta: "'Plus Jakarta Sans', sans-serif",
-      poppins: "'Poppins', sans-serif",
-    };
-    const font = FONTS[selectedFont];
-    if (font) {
-      document.documentElement.style.setProperty("--app-font", font);
-    }
-  }, []);
-
   const handleUploadSuccess = async (result) => {
     setError(null);
     setUploadedMonth(result.month);
     setUploadedYear(result.year);
     setUploadedUnit(result.unit);
 
-    // Save to localStorage
     localStorage.setItem("uploadedMonth", result.month);
     localStorage.setItem("uploadedYear", result.year);
     localStorage.setItem("uploadedUnit", result.unit);
 
-    // Show success notification
     showNotification(
       `Berhasil upload ${result.records_processed} records untuk ${result.unit}`,
       "success"
     );
 
-    // Automatically trigger comparison after successful upload
     await handleComparison(result.month, result.year, result.unit);
   };
 
@@ -224,8 +157,6 @@ function App() {
     const errorMsg = error.message || "Upload failed";
     setError(errorMsg);
     setComparisonResults(null);
-
-    // Show error notification
     showNotification(errorMsg, "error");
   };
 
@@ -235,12 +166,8 @@ function App() {
 
     try {
       const result = await getComparison(month, year, unit);
-
-      // Get existing comparison results from state or localStorage
       const existingResults = comparisonResults || [];
 
-      // Merge new results with existing results
-      // Remove old data for the same month/year/unit, then add new data
       const otherUnitsData = existingResults.filter(
         (row) =>
           !(row.month === month && row.year === year && row.unit === unit)
@@ -253,11 +180,8 @@ function App() {
       const mergedResults = [...otherUnitsData, ...newResults];
 
       setComparisonResults(mergedResults);
-
-      // Save to localStorage
       localStorage.setItem("comparisonResults", JSON.stringify(mergedResults));
 
-      // Show success notification
       showNotification(
         `Perbandingan selesai! Ditemukan ${newResults.length} records untuk ${unit}`,
         "success"
@@ -266,11 +190,8 @@ function App() {
       const errorMessage = err.message || "Failed to get comparison results";
       setError(errorMessage);
       setComparisonResults(null);
-
-      // Clear localStorage on error
       localStorage.removeItem("comparisonResults");
 
-      // Check if it's a network error
       if (errorMessage.includes("No response from server")) {
         setError(
           "Cannot connect to server. Please ensure the backend is running."
@@ -281,33 +202,22 @@ function App() {
     }
   };
 
-  const handleRetry = () => {
-    if (uploadedMonth && uploadedYear && uploadedUnit) {
-      handleComparison(uploadedMonth, uploadedYear, uploadedUnit);
-    }
-  };
-
   const handleLoginSuccess = async (user, permissions) => {
     setIsAuthenticated(true);
     setCurrentUser(user);
     setUserPermissions(permissions || []);
     localStorage.setItem("permissions", JSON.stringify(permissions || []));
 
-    // Load global app settings
     try {
       const token = localStorage.getItem("token");
-      const API_BASE_URL =
-        process.env.REACT_APP_API_URL || "http://localhost:8000";
+      const API_BASE_URL = process.env.REACT_APP_API_URL;
       const response = await fetch(`${API_BASE_URL}/app-settings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
         const data = await response.json();
-        const settings = data.settings;
-
-        // Apply settings
-        applyGlobalSettings(settings);
+        applyGlobalSettings(data.settings);
       }
     } catch (error) {
       console.error("Failed to load app settings:", error);
@@ -319,92 +229,11 @@ function App() {
     );
   };
 
-  // Function to apply global settings
   const applyGlobalSettings = (settings) => {
     if (!settings) return;
-
-    // Apply theme colors
-    const THEME_COLORS = {
-      blue: { primary: "#1e3a8a", secondary: "#1e40af" },
-      green: { primary: "#065f46", secondary: "#047857" },
-      purple: { primary: "#5b21b6", secondary: "#6d28d9" },
-      red: { primary: "#991b1b", secondary: "#b91c1c" },
-      dark: { primary: "#1f2937", secondary: "#374151" },
-      white: { primary: "#ffffff", secondary: "#f3f4f6" },
-      gray: { primary: "#6b7280", secondary: "#9ca3af" },
-    };
-
-    const ACCENT_COLORS = {
-      blue: "#2563eb",
-      green: "#10b981",
-      orange: "#f59e0b",
-      red: "#ef4444",
-      purple: "#8b5cf6",
-    };
-
-    const FONTS = {
-      inter: "'Inter', sans-serif",
-      jakarta: "'Plus Jakarta Sans', sans-serif",
-      poppins: "'Poppins', sans-serif",
-    };
-
-    if (settings.themeColor && THEME_COLORS[settings.themeColor]) {
-      const theme = THEME_COLORS[settings.themeColor];
-      document.documentElement.style.setProperty(
-        "--sidebar-primary",
-        theme.primary
-      );
-      document.documentElement.style.setProperty(
-        "--sidebar-secondary",
-        theme.secondary
-      );
-    }
-
-    if (settings.accentColor && ACCENT_COLORS[settings.accentColor]) {
-      document.documentElement.style.setProperty(
-        "--accent-color",
-        ACCENT_COLORS[settings.accentColor]
-      );
-    }
-
-    if (settings.selectedFont && FONTS[settings.selectedFont]) {
-      document.documentElement.style.setProperty(
-        "--app-font",
-        FONTS[settings.selectedFont]
-      );
-    }
-
-    if (settings.fontSize) {
-      document.documentElement.style.setProperty(
-        "--font-scale",
-        parseInt(settings.fontSize) / 100
-      );
-    }
-
-    if (settings.sidebarWidth) {
-      const widths = { narrow: "180px", normal: "250px", wide: "320px" };
-      document.documentElement.style.setProperty(
-        "--sidebar-width",
-        widths[settings.sidebarWidth] || "250px"
-      );
-    }
-
-    if (settings.contentSpacing) {
-      const spacings = { compact: "0.75", normal: "1", comfortable: "1.5" };
-      document.documentElement.style.setProperty(
-        "--spacing-scale",
-        spacings[settings.contentSpacing] || "1"
-      );
-    }
-
-    if (settings.darkMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
+    // Settings application logic here if needed
   };
 
-  // Check if user has permission
   const hasPermission = (permission) => {
     if (!currentUser) return false;
     if (currentUser.role === "superadmin") return true;
@@ -424,11 +253,14 @@ function App() {
 
   // Show landing page if not authenticated
   if (!isAuthenticated) {
-    return <LandingPage onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <ThemeCustomization>
+        <LandingPage onLoginSuccess={handleLoginSuccess} />
+      </ThemeCustomization>
+    );
   }
 
   const renderContent = () => {
-    // Permission denied component
     const PermissionDenied = () => (
       <div className="permission-denied">
         <h2>🚫 Akses Ditolak</h2>
@@ -456,7 +288,6 @@ function App() {
                 Upload file Excel atau CSV untuk perbandingan data
               </p>
             </header>
-
             <FileUpload
               onUploadSuccess={handleUploadSuccess}
               onUploadError={handleUploadError}
@@ -474,7 +305,6 @@ function App() {
                 Lihat dan cari data pegawai dari periode sebelumnya
               </p>
             </header>
-
             <ArchiveViewer hasPermission={hasPermission} />
           </>
         );
@@ -487,7 +317,6 @@ function App() {
               <h1>Admin Panel</h1>
               <p className="subtitle">Kelola dan hapus data pegawai</p>
             </header>
-
             <AdminPanel />
           </>
         );
@@ -512,7 +341,6 @@ function App() {
                 Customize tampilan landing page dan form login
               </p>
             </header>
-
             <LandingPageSettings />
           </>
         );
@@ -522,53 +350,10 @@ function App() {
     }
   };
 
-  // Create MUI theme
-  const theme = createTheme({
-    palette: {
-      primary: {
-        main: "#5B8DEF",
-        lighter: "#E3F2FD",
-      },
-      secondary: {
-        main: "#6C757D",
-      },
-      text: {
-        primary: "#2C3E50",
-        secondary: "#8898AA",
-      },
-      background: {
-        default: "#F5F5F5",
-        paper: "#FFFFFF",
-      },
-      divider: "#E0E0E0",
-    },
-    typography: {
-      fontFamily:
-        '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      h6: {
-        fontSize: "1rem",
-        fontWeight: 600,
-      },
-      body2: {
-        fontSize: "0.875rem",
-      },
-      caption: {
-        fontSize: "0.75rem",
-      },
-    },
-    shape: {
-      borderRadius: 8,
-    },
-    customShadows: {
-      z1: "0 1px 3px rgba(0,0,0,0.08)",
-    },
-  });
-
   return (
     <ErrorBoundary>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <MainLayout
+      <ThemeCustomization>
+        <DashboardLayout
           activeMenu={activeMenu}
           onMenuChange={setActiveMenu}
           currentUser={currentUser}
@@ -576,9 +361,8 @@ function App() {
           hasPermission={hasPermission}
         >
           {renderContent()}
-        </MainLayout>
+        </DashboardLayout>
 
-        {/* Notification System */}
         {notification && (
           <Notification
             message={notification.message}
@@ -587,7 +371,7 @@ function App() {
             duration={notification.duration}
           />
         )}
-      </ThemeProvider>
+      </ThemeCustomization>
     </ErrorBoundary>
   );
 }
