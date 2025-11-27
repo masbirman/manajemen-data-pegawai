@@ -14,7 +14,7 @@ const VALID_UNITS = [
   "PPPK",
 ];
 
-function ArchiveViewer({ hasPermission }) {
+function ArchiveViewer({ hasPermission, currentUser }) {
   const [archiveData, setArchiveData] = useState(null);
   const [availableMonths, setAvailableMonths] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -224,6 +224,7 @@ function ArchiveViewer({ hasPermission }) {
               unit={selectedUnit || null}
               isArchive={true}
               canEditStatus={hasPermission && hasPermission("edit_status")}
+              currentUser={currentUser}
             />
           </div>
         )}

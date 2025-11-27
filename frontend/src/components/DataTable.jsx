@@ -36,7 +36,36 @@ function DataTable({
   isArchive = false,
   onDataUpdate,
   canEditStatus = true,
+  currentUser = null,
 }) {
+  // Check if user is superadmin
+  const isSuperAdmin = currentUser?.role === "superadmin";
+
+  // Function to mask sensitive data (show first 4 chars + asterisks)
+  const maskSensitiveData = (value) => {
+    if (!value || isSuperAdmin) return value;
+    const str = String(value);
+    if (str.length <= 4) return str;
+    return str.substring(0, 4) + "*".repeat(Math.min(str.length - 4, 10));
+  };
+
+  // Function to mask date (show year only)
+  const maskDate = (value) => {
+    if (!value || isSuperAdmin) return value;
+    const str = String(value);
+    // Format: YYYY-MM-DD or DD-MM-YYYY
+    if (str.includes("-")) {
+      const parts = str.split("-");
+      if (parts[0].length === 4) {
+        // YYYY-MM-DD
+        return parts[0] + "-**-**";
+      } else {
+        // DD-MM-YYYY
+        return "**-**-" + parts[2];
+      }
+    }
+    return str.substring(0, 4) + "****";
+  };
   const [searchText, setSearchText] = useState("");
   const defaultUnit = localStorage.getItem("defaultUnit") || "Dinas";
   const [activeUnit, setActiveUnit] = useState(unit || defaultUnit);
@@ -210,27 +239,6 @@ function DataTable({
     );
   };
 
-  // Custom cell renderer for account number with old/new comparison
-  const AccountNumberRenderer = (params) => {
-    if (
-      params.data.status === "Rekening Berbeda" &&
-      params.data.nomor_rekening_lama
-    ) {
-      return (
-        <div className="account-comparison">
-          <div className="old-account">
-            <span className="label">Lama:</span>{" "}
-            {params.data.nomor_rekening_lama}
-          </div>
-          <div className="new-account">
-            <span className="label">Baru:</span> {params.value}
-          </div>
-        </div>
-      );
-    }
-    return params.value;
-  };
-
   // Column definitions
   const columnDefs = useMemo(
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -242,6 +250,7 @@ function DataTable({
         filter: true,
         width: 150,
         pinned: "left",
+        valueFormatter: (params) => maskSensitiveData(params.value),
       },
       {
         headerName: "Nama",
@@ -256,6 +265,7 @@ function DataTable({
         sortable: true,
         filter: true,
         width: 180,
+        valueFormatter: (params) => maskSensitiveData(params.value),
       },
       {
         headerName: "NPWP",
@@ -263,6 +273,7 @@ function DataTable({
         sortable: true,
         filter: true,
         width: 180,
+        valueFormatter: (params) => maskSensitiveData(params.value),
       },
       {
         headerName: "Tanggal Lahir",
@@ -270,6 +281,7 @@ function DataTable({
         sortable: true,
         filter: true,
         width: 150,
+        valueFormatter: (params) => maskDate(params.value),
       },
       {
         headerName: "Kode Bank",
@@ -291,7 +303,26 @@ function DataTable({
         sortable: true,
         filter: true,
         width: 250,
-        cellRenderer: AccountNumberRenderer,
+        cellRenderer: (params) => {
+          if (
+            params.data.status === "Rekening Berbeda" &&
+            params.data.nomor_rekening_lama
+          ) {
+            return (
+              <div className="account-comparison">
+                <div className="old-account">
+                  <span className="label">Lama:</span>{" "}
+                  {maskSensitiveData(params.data.nomor_rekening_lama)}
+                </div>
+                <div className="new-account">
+                  <span className="label">Baru:</span>{" "}
+                  {maskSensitiveData(params.value)}
+                </div>
+              </div>
+            );
+          }
+          return maskSensitiveData(params.value);
+        },
       },
       {
         headerName: "Status",
@@ -393,7 +424,7 @@ function DataTable({
         },
       },
     ],
-    []
+    [isSuperAdmin]
   );
 
   // Default column properties

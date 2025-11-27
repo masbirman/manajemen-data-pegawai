@@ -274,7 +274,12 @@ function AppContent() {
 
       case "comparison":
         if (!hasPermission("compare")) return <PermissionDenied />;
-        return <ComparisonView hasPermission={hasPermission} />;
+        return (
+          <ComparisonView
+            hasPermission={hasPermission}
+            currentUser={currentUser}
+          />
+        );
 
       case "upload":
         if (!hasPermission("upload")) return <PermissionDenied />;
@@ -303,7 +308,10 @@ function AppContent() {
                 Lihat dan cari data pegawai dari periode sebelumnya
               </p>
             </header>
-            <ArchiveViewer hasPermission={hasPermission} />
+            <ArchiveViewer
+              hasPermission={hasPermission}
+              currentUser={currentUser}
+            />
           </>
         );
 

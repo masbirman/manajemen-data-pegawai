@@ -14,7 +14,7 @@ const VALID_UNITS = [
   "PPPK",
 ];
 
-function ComparisonView({ hasPermission }) {
+function ComparisonView({ hasPermission, currentUser }) {
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(
     currentDate.getMonth() + 1
@@ -180,6 +180,7 @@ function ComparisonView({ hasPermission }) {
         unit={selectedUnit}
         isArchive={false}
         canEditStatus={hasPermission && hasPermission("edit_status")}
+        currentUser={currentUser}
       />
     </div>
   );
