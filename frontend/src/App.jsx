@@ -12,6 +12,8 @@ import ProfileSettings from "./components/ProfileSettings";
 import LandingPage from "./components/LandingPage";
 import LandingPageSettings from "./components/LandingPageSettings";
 import UserManagement from "./components/UserManagement";
+import MaintenanceSettings from "./components/MaintenanceSettings";
+import MaintenancePage from "./components/MaintenancePage";
 import Notification from "./components/Notification";
 import { useNotification } from "./hooks/useNotification";
 import { getComparison } from "./api/api";
@@ -47,10 +49,14 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return !!localStorage.getItem("token");
   });
+  const [maintenanceMode, setMaintenanceMode] = useState(null);
+  const [checkingMaintenance, setCheckingMaintenance] = useState(true);
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
@@ -81,6 +87,25 @@ function AppContent() {
 
   const { notification, showNotification, hideNotification } =
     useNotification();
+
+  // Check maintenance mode on mount
+  React.useEffect(() => {
+    const checkMaintenance = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/maintenance/status`);
+        if (response.ok) {
+          const data = await response.json();
+          setMaintenanceMode(data);
+        }
+      } catch (error) {
+        console.error("Failed to check maintenance status:", error);
+      } finally {
+        setCheckingMaintenance(false);
+      }
+    };
+
+    checkMaintenance();
+  }, []);
 
   React.useEffect(() => {
     const handleShowNotification = (event) => {
@@ -186,7 +211,19 @@ function AppContent() {
     showNotification("Anda telah logout", "info");
   };
 
+  // Show maintenance page if enabled (except for superadmin)
+  if (!checkingMaintenance && maintenanceMode?.enabled) {
+    // If user is superadmin, allow access
+    if (currentUser?.role !== "superadmin") {
+      return <MaintenancePage settings={maintenanceMode} />;
+    }
+  }
+
   if (!isAuthenticated) {
+    // Check maintenance for login page too
+    if (!checkingMaintenance && maintenanceMode?.enabled) {
+      return <MaintenancePage settings={maintenanceMode} />;
+    }
     return <LandingPage onLoginSuccess={handleLoginSuccess} />;
   }
 
@@ -274,6 +311,10 @@ function AppContent() {
             <LandingPageSettings />
           </>
         );
+
+      case "maintenance":
+        if (currentUser?.role !== "superadmin") return <PermissionDenied />;
+        return <MaintenanceSettings />;
 
       default:
         return null;
