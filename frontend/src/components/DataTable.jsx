@@ -102,8 +102,8 @@ function DataTable({
 
   // Update activeUnit ref when it changes
   useEffect(() => {
-    activeUnitRef.current = activeUnit;
-  }, [activeUnit]);
+    activeUnitRef.current = unit;
+  }, [unit]);
 
   // Get available years from data
   const getAvailableYears = () => {
@@ -121,9 +121,9 @@ function DataTable({
 
       try {
         // Use refs to get latest values (avoid stale closure)
-        const currentMonth = selectedMonthRef.current;
-        const currentYear = selectedYearRef.current;
-        const currentUnit = activeUnitRef.current;
+        const currentMonth = selectedMonthRef.current || params.data.month;
+        const currentYear = selectedYearRef.current || params.data.year;
+        const currentUnit = activeUnitRef.current || params.data.unit;
 
         // Check if this is a departed employee (from previous month)
         const isDepartedEmployee =
