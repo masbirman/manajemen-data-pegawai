@@ -46,7 +46,7 @@ function Settings() {
       };
 
       // Save to API
-      const response = await fetch(`${API_BASE_URL}/app-settings`, {
+      const response = await fetch(`${API_BASE_URL}/app-settings/`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -88,7 +88,7 @@ function Settings() {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch(`${API_BASE_URL}/app-settings/reset`, {
+      const response = await fetch(`${API_BASE_URL}/app-settings/reset/`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
