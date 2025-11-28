@@ -37,6 +37,7 @@ app.add_middleware(
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 (UPLOAD_DIR / "landing").mkdir(exist_ok=True)
+(UPLOAD_DIR / "avatars").mkdir(exist_ok=True)
 
 
 # Error handlers

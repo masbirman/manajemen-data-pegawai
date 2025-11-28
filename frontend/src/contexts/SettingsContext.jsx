@@ -40,22 +40,26 @@ export function SettingsProvider({ children }) {
     const loadSettings = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) return;
+        if (!token || !API_BASE_URL) return;
 
         const response = await fetch(`${API_BASE_URL}/app-settings`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.ok) {
-          const data = await response.json();
-          if (data.settings) {
-            const newSettings = { ...defaultSettings, ...data.settings };
-            setSettings(newSettings);
-            localStorage.setItem("appSettings", JSON.stringify(newSettings));
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+            if (data.settings) {
+              const newSettings = { ...defaultSettings, ...data.settings };
+              setSettings(newSettings);
+              localStorage.setItem("appSettings", JSON.stringify(newSettings));
+            }
           }
         }
       } catch (error) {
-        console.error("Failed to load settings:", error);
+        // Silently fail - use localStorage settings as fallback
+        console.warn("Failed to load settings from API, using local settings");
       }
     };
 

@@ -475,9 +475,8 @@ async def upload_own_avatar(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Update user avatar URL - use environment variable for base URL
-        api_url = os.getenv("API_BASE_URL", "http://localhost:8000")
-        current_user.avatar_url = f"{api_url}/uploads/avatars/{filename}"
+        # Use relative path for avatar URL (works with any domain/reverse proxy)
+        current_user.avatar_url = f"/uploads/avatars/{filename}"
         db.commit()
         db.refresh(current_user)
         
@@ -700,9 +699,8 @@ async def upload_user_avatar(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Update user avatar URL - use environment variable for base URL
-        api_url = os.getenv("API_BASE_URL", "http://localhost:8000")
-        user.avatar_url = f"{api_url}/uploads/avatars/{filename}"
+        # Use relative path for avatar URL (works with any domain/reverse proxy)
+        user.avatar_url = f"/uploads/avatars/{filename}"
         db.commit()
         db.refresh(user)
         

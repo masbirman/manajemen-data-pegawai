@@ -96,13 +96,20 @@ function AppContent() {
   React.useEffect(() => {
     const checkMaintenance = async () => {
       try {
+        if (!API_BASE_URL) {
+          setCheckingMaintenance(false);
+          return;
+        }
         const response = await fetch(`${API_BASE_URL}/maintenance/status`);
         if (response.ok) {
-          const data = await response.json();
-          setMaintenanceMode(data);
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+            setMaintenanceMode(data);
+          }
         }
       } catch (error) {
-        console.error("Failed to check maintenance status:", error);
+        console.warn("Failed to check maintenance status:", error);
       } finally {
         setCheckingMaintenance(false);
       }

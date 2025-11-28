@@ -23,27 +23,31 @@ export default function DrawerHeader({ open, currentUser }) {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
+        if (!API_BASE_URL) return;
         const response = await fetch(`${API_BASE_URL}/landing/settings`);
         if (response.ok) {
-          const data = await response.json();
-          const settings = data.settings;
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+            const settings = data.settings;
 
-          if (settings.sidebar_logo_url) {
-            const fixedUrl = settings.sidebar_logo_url.replace(
-              /http:\/\/localhost:\d+/,
-              API_BASE_URL
-            );
-            setLogoSrc(fixedUrl);
-          }
-          if (settings.sidebar_title) {
-            setTitle(settings.sidebar_title);
-          }
-          if (settings.sidebar_tagline) {
-            setTagline(settings.sidebar_tagline);
+            if (settings.sidebar_logo_url) {
+              const fixedUrl = settings.sidebar_logo_url.replace(
+                /http:\/\/localhost:\d+/,
+                API_BASE_URL
+              );
+              setLogoSrc(fixedUrl);
+            }
+            if (settings.sidebar_title) {
+              setTitle(settings.sidebar_title);
+            }
+            if (settings.sidebar_tagline) {
+              setTagline(settings.sidebar_tagline);
+            }
           }
         }
       } catch (err) {
-        console.error("Failed to fetch sidebar settings:", err);
+        console.warn("Failed to fetch sidebar settings:", err);
       }
     };
 
