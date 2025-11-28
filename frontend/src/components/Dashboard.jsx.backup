@@ -343,14 +343,7 @@ function Dashboard() {
               </thead>
               <tbody>
                 {Object.entries(stats.unitBreakdown)
-                  .sort((a, b) => {
-                    const unitOrder = ["Dinas", "Cabdis Wil. 1", "Cabdis Wil. 2", "Cabdis Wil. 3", "Cabdis Wil. 4", "Cabdis Wil. 5", "Cabdis Wil. 6", "PPPK"];
-                    const indexA = unitOrder.indexOf(a[0]);
-                    const indexB = unitOrder.indexOf(b[0]);
-                    if (indexA === -1) return 1;
-                    if (indexB === -1) return -1;
-                    return indexA - indexB;
-                  })
+                  .sort((a, b) => b[1].total - a[1].total)
                   .map(([unit, breakdown], idx) => (
                     <tr key={idx}>
                       <td className="unit-name">{unit}</td>
