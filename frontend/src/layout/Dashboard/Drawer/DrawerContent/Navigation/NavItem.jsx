@@ -28,7 +28,12 @@ export default function NavItem({ item, level, activeMenu, onMenuChange }) {
   );
 
   const isSelected = activeMenu === item.id;
-  const iconSelectedColor = "primary.main";
+  
+  // Dark Sidebar Colors
+  const textColor = "#e2e8f0"; // Slate 200
+  const activeTextColor = "#ffffff";
+  const activeBgColor = "rgba(255, 255, 255, 0.1)"; // Glass effect
+  const hoverBgColor = "rgba(255, 255, 255, 0.05)";
 
   const itemHandler = () => {
     if (downLG) handlerDrawerOpen(false);
@@ -46,18 +51,26 @@ export default function NavItem({ item, level, activeMenu, onMenuChange }) {
           zIndex: 1201,
           pl: drawerOpen ? 2.5 : 1.5,
           py: !drawerOpen && level === 1 ? 1.25 : 1,
+          mb: 0.5,
           ...(drawerOpen && {
-            "&:hover": { bgcolor: "secondary.200" },
+            "&:hover": { 
+              bgcolor: hoverBgColor,
+              color: activeTextColor
+            },
             "&.Mui-selected": {
-              bgcolor: "primary.lighter",
-              "&:hover": { bgcolor: "primary.lighter" },
+              bgcolor: activeBgColor,
+              color: activeTextColor,
+              "&:hover": { 
+                bgcolor: activeBgColor,
+                color: activeTextColor
+              },
+              borderRight: "3px solid #60a5fa" // Accent border
             },
           }),
           ...(drawerOpen &&
             level === 1 && {
               mx: 1.25,
-              my: 0.5,
-              borderRadius: 1,
+              borderRadius: "8px",
             }),
           ...(!drawerOpen && {
             px: 2.75,
@@ -75,8 +88,7 @@ export default function NavItem({ item, level, activeMenu, onMenuChange }) {
           <ListItemIcon
             sx={{
               minWidth: 38,
-              color: "secondary.main",
-              ...(isSelected && { color: iconSelectedColor }),
+              color: isSelected ? activeTextColor : textColor,
               ...(!drawerOpen &&
                 level === 1 && {
                   borderRadius: 1,
@@ -84,12 +96,13 @@ export default function NavItem({ item, level, activeMenu, onMenuChange }) {
                   height: 46,
                   alignItems: "center",
                   justifyContent: "center",
-                  "&:hover": { bgcolor: "secondary.200" },
+                  "&:hover": { bgcolor: hoverBgColor },
                 }),
               ...(!drawerOpen &&
                 isSelected && {
-                  bgcolor: "primary.lighter",
-                  "&:hover": { bgcolor: "primary.lighter" },
+                  bgcolor: activeBgColor,
+                  color: activeTextColor,
+                  "&:hover": { bgcolor: activeBgColor },
                 }),
             }}
           >
@@ -103,9 +116,8 @@ export default function NavItem({ item, level, activeMenu, onMenuChange }) {
               <Typography
                 variant="h6"
                 sx={{
-                  color: "secondary.main",
-                  ...(isSelected && { color: iconSelectedColor }),
-                  fontWeight: isSelected ? 500 : 400,
+                  color: isSelected ? activeTextColor : textColor,
+                  fontWeight: isSelected ? 600 : 400,
                 }}
               >
                 {item.title}

@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
+import Divider from "@mui/material/Divider";
 
 // project-imports
 import DrawerHeaderStyled from "./DrawerHeaderStyled";
@@ -55,26 +56,27 @@ export default function DrawerHeader({ open, currentUser }) {
   }, []);
 
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       {/* Logo & Title */}
       <DrawerHeaderStyled
         open={open}
         sx={{
           minHeight: HEADER_HEIGHT,
           width: "initial",
-          paddingTop: "8px",
-          paddingBottom: "8px",
+          paddingTop: "16px",
+          paddingBottom: "16px",
           paddingLeft: open ? "24px" : 0,
+          justifyContent: open ? "flex-start" : "center",
         }}
       >
-        <Stack direction="row" spacing={1.5} alignItems="center">
+        <Stack direction="row" spacing={2} alignItems="center">
           {logoSrc ? (
             <img
               src={logoSrc}
               alt="Logo"
               style={{
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 borderRadius: 8,
                 objectFit: "contain",
               }}
@@ -82,16 +84,17 @@ export default function DrawerHeader({ open, currentUser }) {
           ) : (
             <Box
               sx={{
-                width: 36,
-                height: 36,
-                borderRadius: 1,
-                bgcolor: "primary.main",
+                width: 40,
+                height: 40,
+                borderRadius: "10px",
+                background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", // Brighter Blue
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "white",
                 fontWeight: 700,
-                fontSize: "1rem",
+                fontSize: "1.2rem",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.2)"
               }}
             >
               📊
@@ -101,11 +104,16 @@ export default function DrawerHeader({ open, currentUser }) {
             <Box>
               <Typography
                 variant="subtitle1"
-                sx={{ fontWeight: 600, color: "text.primary", lineHeight: 1.2 }}
+                sx={{ 
+                  fontWeight: 700, 
+                  color: "#ffffff", // White text
+                  lineHeight: 1.2,
+                  fontSize: "1rem"
+                }}
               >
                 {title}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ fontSize: "0.75rem", color: "#94a3b8" }}>
                 {tagline}
               </Typography>
             </Box>
@@ -113,57 +121,9 @@ export default function DrawerHeader({ open, currentUser }) {
         </Stack>
       </DrawerHeaderStyled>
 
-      {/* User Profile Section */}
-      {currentUser && open && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            p: 2,
-            mx: 1.5,
-            mb: 1,
-            bgcolor: "secondary.lighter",
-            borderRadius: 2,
-          }}
-        >
-          <Avatar
-            src={
-              currentUser.avatar_url
-                ? currentUser.avatar_url.replace(
-                    /http:\/\/localhost:\d+/,
-                    API_BASE_URL
-                  )
-                : undefined
-            }
-            sx={{
-              width: 40,
-              height: 40,
-              bgcolor: "primary.main",
-              fontSize: "1rem",
-            }}
-          >
-            {currentUser.full_name
-              ? currentUser.full_name.charAt(0).toUpperCase()
-              : currentUser.username?.charAt(0).toUpperCase()}
-          </Avatar>
-          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: 600, color: "text.primary" }}
-              noWrap
-            >
-              {currentUser.full_name || currentUser.username}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: "text.secondary", textTransform: "capitalize" }}
-            >
-              {currentUser.role}
-            </Typography>
-          </Box>
-        </Box>
-      )}
+      {/* User Profile Section Removed - Moved to Navbar */}
+      
+      {open && <Divider sx={{ mx: 2, mb: 1, borderColor: "rgba(255, 255, 255, 0.1)" }} />}
     </Box>
   );
 }

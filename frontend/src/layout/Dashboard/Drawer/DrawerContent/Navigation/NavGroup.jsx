@@ -43,31 +43,33 @@ export default function NavGroup({ item, activeMenu, onMenuChange }) {
         <>
           {item.title ? (
             drawerOpen && (
-              <Box sx={{ pl: 3, mb: 1.5 }}>
+              <Box sx={{ pl: 2.5, mb: 1, mt: 2 }}>
                 <Typography
-                  variant="h5"
+                  variant="caption"
                   sx={{
                     textTransform: "uppercase",
-                    fontSize: "0.688rem",
-                    color: "secondary.dark",
-                    fontWeight: 600,
+                    fontSize: "0.75rem",
+                    color: "#94a3b8", // Slate 400 for dark background
+                    fontWeight: 700,
+                    letterSpacing: "0.05em",
+                    display: "block"
                   }}
                 >
                   {item.title}
                 </Typography>
                 {item.caption && (
-                  <Typography variant="caption" color="secondary">
+                  <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: "#64748b" }}>
                     {item.caption}
                   </Typography>
                 )}
               </Box>
             )
           ) : (
-            <Divider sx={{ my: 0.5 }} />
+            <Divider sx={{ my: 1, borderColor: 'rgba(255,255,255,0.1)' }} />
           )}
         </>
       }
-      sx={{ mt: drawerOpen && item.title ? 1.5 : 0, py: 0, zIndex: 0 }}
+      sx={{ mt: 0, py: 0, zIndex: 0 }}
     >
       {navCollapse}
     </List>

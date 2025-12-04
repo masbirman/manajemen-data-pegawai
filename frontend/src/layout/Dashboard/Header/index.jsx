@@ -56,8 +56,8 @@ export default function Header({ currentUser, onLogout }) {
     position: "fixed",
     elevation: 0,
     sx: (theme) => ({
-      bgcolor: alpha(theme.palette.background.default, 0.8),
-      backdropFilter: "blur(8px)",
+      bgcolor: "#ffffff", // Solid white
+      borderBottom: "1px solid #e2e8f0", // Subtle border
       zIndex: 1200,
       width: {
         xs: "100%",

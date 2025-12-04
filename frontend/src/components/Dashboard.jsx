@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { getAvailableMonths, getArchiveData } from "../api/api";
+import { 
+  PeopleAlt as PeopleIcon, 
+  Business as BusinessIcon, 
+  Edit as EditIcon,
+  Refresh as RefreshIcon,
+  AddCircleOutline as AddIcon,
+  RemoveCircleOutline as RemoveIcon,
+  SwapHoriz as TransferIcon,
+  Elderly as RetireIcon,
+  AccountBalanceWallet as WalletIcon,
+  CalendarMonth as CalendarIcon,
+  FilterAlt as FilterIcon
+} from "@mui/icons-material";
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -216,7 +229,10 @@ function Dashboard() {
   if (loading) {
     return (
       <div className="dashboard-container">
-        <div className="loading">Loading dashboard...</div>
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Memuat data dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -224,49 +240,58 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h2>Dashboard</h2>
-        <p>Ringkasan data pegawai dan statistik</p>
+        <div>
+          <h2>Dashboard Overview</h2>
+          <p>Ringkasan data pegawai dan statistik bulanan</p>
+        </div>
+        <div className="header-actions">
+           {/* Placeholder for potential future actions */}
+        </div>
       </div>
 
       {/* Month/Year Filter */}
       <div className="dashboard-filters">
         <div className="filter-group">
-          <label htmlFor="dashboard-month">Bulan</label>
-          <select
-            id="dashboard-month"
-            value={selectedMonth || ""}
-            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-          >
-            {getMonthsForYear(selectedYear).map((m, idx) => (
-              <option key={idx} value={m.month}>
-                {new Date(2000, m.month - 1).toLocaleString("id-ID", {
-                  month: "long",
-                })}
-              </option>
-            ))}
-          </select>
+          <label htmlFor="dashboard-month"><CalendarIcon fontSize="small"/> Bulan</label>
+          <div className="select-wrapper">
+            <select
+              id="dashboard-month"
+              value={selectedMonth || ""}
+              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+            >
+              {getMonthsForYear(selectedYear).map((m, idx) => (
+                <option key={idx} value={m.month}>
+                  {new Date(2000, m.month - 1).toLocaleString("id-ID", {
+                    month: "long",
+                  })}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="filter-group">
-          <label htmlFor="dashboard-year">Tahun</label>
-          <select
-            id="dashboard-year"
-            value={selectedYear || ""}
-            onChange={(e) => handleYearChange(parseInt(e.target.value))}
-          >
-            {[...new Set(availableMonths.map((m) => m.year))]
-              .sort((a, b) => b - a)
-              .map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-          </select>
+          <label htmlFor="dashboard-year"><FilterIcon fontSize="small"/> Tahun</label>
+          <div className="select-wrapper">
+            <select
+              id="dashboard-year"
+              value={selectedYear || ""}
+              onChange={(e) => handleYearChange(parseInt(e.target.value))}
+            >
+              {[...new Set(availableMonths.map((m) => m.year))]
+                .sort((a, b) => b - a)
+                .map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+            </select>
+          </div>
         </div>
 
         <div className="filter-info">
           <span className="info-badge">
-            📅 Menampilkan data:{" "}
+            Menampilkan data:{" "}
             <strong>
               {selectedMonth &&
                 new Date(2000, selectedMonth - 1).toLocaleString("id-ID", {
@@ -283,33 +308,36 @@ function Dashboard() {
           title="Refresh data"
           disabled={autoRefreshing}
         >
-          {autoRefreshing ? "🔄 Auto-refreshing..." : "🔄 Refresh"}
+          <RefreshIcon className={autoRefreshing ? "spin" : ""} fontSize="small" />
+          {autoRefreshing ? "Refreshing..." : "Refresh Data"}
         </button>
-
-        {autoRefreshing && (
-          <span className="auto-refresh-indicator">⚡ Auto-refreshing...</span>
-        )}
       </div>
 
       {/* Summary Cards */}
       {stats && (
         <div className="summary-cards">
-          <div className="summary-card">
-            <div className="card-icon">👥</div>
+          <div className="summary-card primary">
+            <div className="card-icon-wrapper">
+              <PeopleIcon fontSize="large" />
+            </div>
             <div className="card-content">
               <h4>{stats.totals?.totalPegawai || 0}</h4>
               <p>Total Pegawai Aktif</p>
             </div>
           </div>
-          <div className="summary-card">
-            <div className="card-icon">🏢</div>
+          <div className="summary-card secondary">
+            <div className="card-icon-wrapper">
+              <BusinessIcon fontSize="large" />
+            </div>
             <div className="card-content">
               <h4>{stats.totalUnits}</h4>
-              <p>Total Unit</p>
+              <p>Total Unit Kerja</p>
             </div>
           </div>
-          <div className="summary-card">
-            <div className="card-icon">✏️</div>
+          <div className="summary-card warning">
+            <div className="card-icon-wrapper">
+              <EditIcon fontSize="large" />
+            </div>
             <div className="card-content">
               <h4>{stats.totalManualOverride}</h4>
               <p>Manual Override</p>
@@ -321,35 +349,38 @@ function Dashboard() {
       {/* Unit Status Breakdown Table */}
       {stats?.unitBreakdown && Object.keys(stats.unitBreakdown).length > 0 && (
         <div className="unit-status-breakdown">
-          <h3>
-            📊 Breakdown Status per Unit -{" "}
-            {selectedMonth &&
-              new Date(2000, selectedMonth - 1).toLocaleString("id-ID", {
-                month: "long",
-              })}{" "}
-            {selectedYear}
-          </h3>
+          <div className="section-header">
+            <h3>Breakdown Status per Unit</h3>
+            <span className="period-badge">
+              {selectedMonth &&
+                new Date(2000, selectedMonth - 1).toLocaleString("id-ID", {
+                  month: "long",
+                })}{" "}
+              {selectedYear}
+            </span>
+          </div>
+          
           <div className="table-wrapper">
             <table className="status-table">
               <thead>
                 <tr>
-                  <th className="unit-col">Unit</th>
-                  <th className="status-col masuk-col">
-                    <span className="status-icon">➕</span> Masuk
+                  <th className="unit-col">Unit Kerja</th>
+                  <th className="status-col">
+                    <div className="th-content"><AddIcon fontSize="small"/> Masuk</div>
                   </th>
-                  <th className="status-col keluar-col">
-                    <span className="status-icon">➖</span> Keluar
+                  <th className="status-col">
+                    <div className="th-content"><RemoveIcon fontSize="small"/> Keluar</div>
                   </th>
-                  <th className="status-col pindah-col">
-                    <span className="status-icon">🔄</span> Pindah
+                  <th className="status-col">
+                    <div className="th-content"><TransferIcon fontSize="small"/> Pindah</div>
                   </th>
-                  <th className="status-col pensiun-col">
-                    <span className="status-icon">👴</span> Pensiun
+                  <th className="status-col">
+                    <div className="th-content"><RetireIcon fontSize="small"/> Pensiun</div>
                   </th>
-                  <th className="status-col rekening-col">
-                    <span className="status-icon">💳</span> Rekening Berbeda
+                  <th className="status-col">
+                    <div className="th-content"><WalletIcon fontSize="small"/> Rek. Beda</div>
                   </th>
-                  <th className="total-col">Total Pegawai</th>
+                  <th className="total-col">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -376,22 +407,40 @@ function Dashboard() {
                   .map(([unit, breakdown], idx) => (
                     <tr key={idx}>
                       <td className="unit-name">{unit}</td>
-                      <td className="status-value masuk-value">
-                        {breakdown.masuk > 0 ? breakdown.masuk : "-"}
+                      <td>
+                        {breakdown.masuk > 0 ? (
+                          <span className="status-badge masuk">{breakdown.masuk}</span>
+                        ) : (
+                          <span className="empty-dash">-</span>
+                        )}
                       </td>
-                      <td className="status-value keluar-value">
-                        {breakdown.keluar > 0 ? breakdown.keluar : "-"}
+                      <td>
+                        {breakdown.keluar > 0 ? (
+                          <span className="status-badge keluar">{breakdown.keluar}</span>
+                        ) : (
+                          <span className="empty-dash">-</span>
+                        )}
                       </td>
-                      <td className="status-value pindah-value">
-                        {breakdown.pindah > 0 ? breakdown.pindah : "-"}
+                      <td>
+                        {breakdown.pindah > 0 ? (
+                          <span className="status-badge pindah">{breakdown.pindah}</span>
+                        ) : (
+                          <span className="empty-dash">-</span>
+                        )}
                       </td>
-                      <td className="status-value pensiun-value">
-                        {breakdown.pensiun > 0 ? breakdown.pensiun : "-"}
+                      <td>
+                        {breakdown.pensiun > 0 ? (
+                          <span className="status-badge pensiun">{breakdown.pensiun}</span>
+                        ) : (
+                          <span className="empty-dash">-</span>
+                        )}
                       </td>
-                      <td className="status-value rekening-value">
-                        {breakdown.rekeningBerbeda > 0
-                          ? breakdown.rekeningBerbeda
-                          : "-"}
+                      <td>
+                        {breakdown.rekeningBerbeda > 0 ? (
+                          <span className="status-badge rekening">{breakdown.rekeningBerbeda}</span>
+                        ) : (
+                          <span className="empty-dash">-</span>
+                        )}
                       </td>
                       <td className="total-value">
                         <strong>{breakdown.totalPegawai}</strong>
@@ -402,22 +451,22 @@ function Dashboard() {
               <tfoot>
                 <tr className="totals-row">
                   <td className="unit-name">
-                    <strong>TOTAL</strong>
+                    <strong>TOTAL KESELURUHAN</strong>
                   </td>
-                  <td className="status-value masuk-value">
-                    <strong>{stats.totals.masuk}</strong>
+                  <td>
+                    <span className="status-badge masuk total">{stats.totals.masuk}</span>
                   </td>
-                  <td className="status-value keluar-value">
-                    <strong>{stats.totals.keluar}</strong>
+                  <td>
+                    <span className="status-badge keluar total">{stats.totals.keluar}</span>
                   </td>
-                  <td className="status-value pindah-value">
-                    <strong>{stats.totals.pindah}</strong>
+                  <td>
+                    <span className="status-badge pindah total">{stats.totals.pindah}</span>
                   </td>
-                  <td className="status-value pensiun-value">
-                    <strong>{stats.totals.pensiun}</strong>
+                  <td>
+                    <span className="status-badge pensiun total">{stats.totals.pensiun}</span>
                   </td>
-                  <td className="status-value rekening-value">
-                    <strong>{stats.totals.rekeningBerbeda}</strong>
+                  <td>
+                    <span className="status-badge rekening total">{stats.totals.rekeningBerbeda}</span>
                   </td>
                   <td className="total-value">
                     <strong>{stats.totals.totalPegawai}</strong>

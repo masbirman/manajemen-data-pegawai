@@ -6,14 +6,13 @@ import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import InputBase from "@mui/material/InputBase";
 import Badge from "@mui/material/Badge";
+import Tooltip from "@mui/material/Tooltip";
 
 // icons
-import SearchIcon from "@mui/icons-material/Search";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
+import PersonIcon from "@mui/icons-material/Person";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -24,66 +23,32 @@ export default function HeaderContent({ currentUser, onLogout }) {
 
   return (
     <>
-      {/* Search */}
-      {!downLG && (
-        <Box sx={{ width: "100%", ml: { xs: 0, md: 2 } }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              bgcolor: "secondary.lighter",
-              borderRadius: 1,
-              px: 1.5,
-              py: 0.5,
-              width: { xs: "100%", md: 224 },
-            }}
-          >
-            <SearchIcon sx={{ color: "secondary.main", fontSize: 20, mr: 1 }} />
-            <InputBase
-              placeholder="Ctrl + K"
-              sx={{
-                fontSize: "0.875rem",
-                color: "secondary.main",
-                "& input::placeholder": { opacity: 0.7 },
-              }}
-            />
-          </Box>
-        </Box>
-      )}
-
-      {downLG && <Box sx={{ width: 1, ml: 1 }} />}
+      {/* Spacer to push everything to the right */}
+      <Box sx={{ flexGrow: 1 }} />
 
       {/* Notification */}
-      <IconButton
-        sx={{
-          color: "secondary.main",
-          "&:hover": { bgcolor: "secondary.lighter" },
-        }}
-      >
-        <Badge badgeContent={2} color="error" variant="dot">
-          <NotificationsNoneIcon />
-        </Badge>
-      </IconButton>
+      <Tooltip title="Notifications">
+        <IconButton
+          sx={{
+            color: "text.secondary",
+            mr: 2,
+            "&:hover": { bgcolor: "action.hover", color: "primary.main" },
+          }}
+        >
+          <Badge badgeContent={2} color="error" variant="dot">
+            <NotificationsNoneIcon />
+          </Badge>
+        </IconButton>
+      </Tooltip>
 
-      {/* Settings */}
-      <IconButton
-        sx={{
-          color: "secondary.main",
-          "&:hover": { bgcolor: "secondary.lighter" },
-        }}
-      >
-        <SettingsOutlinedIcon />
-      </IconButton>
-
-      {/* Profile */}
+      {/* Profile Section */}
       {currentUser && (
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             gap: 1.5,
-            ml: 1,
-            pl: 1.5,
+            pl: 2,
             borderLeft: "1px solid",
             borderColor: "divider",
           }}
@@ -107,13 +72,14 @@ export default function HeaderContent({ currentUser, onLogout }) {
                 sx={{
                   color: "text.secondary",
                   textTransform: "capitalize",
-                  fontSize: "0.7rem",
+                  fontSize: "0.75rem",
                 }}
               >
                 {currentUser.role}
               </Typography>
             </Box>
           )}
+          
           <Avatar
             src={
               currentUser.avatar_url
@@ -124,25 +90,31 @@ export default function HeaderContent({ currentUser, onLogout }) {
                 : undefined
             }
             sx={{
-              width: 36,
-              height: 36,
+              width: 40,
+              height: 40,
               bgcolor: "primary.main",
               cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              border: "2px solid #fff"
             }}
           >
             {currentUser.full_name?.charAt(0) ||
               currentUser.username?.charAt(0)}
           </Avatar>
-          <IconButton
-            size="small"
-            onClick={onLogout}
-            sx={{
-              color: "secondary.main",
-              "&:hover": { color: "error.main", bgcolor: "error.lighter" },
-            }}
-          >
-            <LogoutIcon fontSize="small" />
-          </IconButton>
+
+          <Tooltip title="Logout">
+            <IconButton
+              size="small"
+              onClick={onLogout}
+              sx={{
+                ml: 0.5,
+                color: "text.secondary",
+                "&:hover": { color: "error.main", bgcolor: "error.lighter" },
+              }}
+            >
+              <LogoutIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       )}
     </>

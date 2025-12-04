@@ -6,11 +6,11 @@ import Drawer from "@mui/material/Drawer";
 import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from "../../../config";
 
 const openedMixin = (theme) => ({
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: "#1e3a8a", // Deep Indigo Background
+  color: "#ffffff", // White text
   width: DRAWER_WIDTH,
-  borderRight: "1px dashed",
-  borderRightColor: theme.palette.secondary[400],
-  boxShadow: "none",
+  borderRight: "none", // Remove dashed border
+  boxShadow: "4px 0 24px 0 rgba(0,0,0,0.1)", // Modern shadow
 
   overflowX: "hidden",
 
@@ -22,7 +22,8 @@ const openedMixin = (theme) => ({
 
 const closedMixin = (theme) => ({
   overflow: "hidden",
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: "#1e3a8a", // Deep Indigo Background
+  color: "#ffffff", // White text
 
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,

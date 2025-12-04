@@ -3,12 +3,38 @@
 export default function Default(mode) {
   const contrastText = '#fff';
 
-  let primaryColors = ['#E9F0FF', '#C8D9FF', '#A3C0FF', '#7EA6FF', '#6293FF', '#4680FF', '#3F78FF', '#376DFF', '#2F63FF', '#2050FF'];
-  let secondaryColors = ['#F8F9FA', '#F8F9FA', '#F3F5F7', '#DBE0E5', '#BEC8D0', '#8996A4', '#5B6B79', '#3E4853', '#1D2630', '#131920'];
-  let errorColors = ['#f5bebe', '#e76767', '#dc2626', '#d31c1c', '#c50d0d'];
-  let warningColors = ['#f7dcb3', '#edad4d', '#e58a00', '#de7700', '#d35a00'];
-  let infoColors = ['#c5eff3', '#78d9e2', '#3ec9d6', '#30bccc', '#1ba9bc'];
-  let successColors = ['#c0e5d9', '#6bc2a5', '#2ca87f', '#21976c', '#107d4f'];
+  // Modern Indigo/Blue Palette
+  let primaryColors = [
+    '#eff6ff', // lighter (50)
+    '#dbeafe', // 100
+    '#bfdbfe', // 200
+    '#93c5fd', // light (300)
+    '#60a5fa', // 400
+    '#2563eb', // main (600) - Vibrant Blue
+    '#1d4ed8', // dark (700)
+    '#1e40af', // 800
+    '#1e3a8a', // darker (900) - Deep Indigo
+    '#172554'  // 950
+  ];
+
+  // Slate/Gray Palette for Secondary
+  let secondaryColors = [
+    '#f8fafc', // lighter
+    '#f1f5f9',
+    '#e2e8f0',
+    '#cbd5e1', // light
+    '#94a3b8',
+    '#64748b', // main (Slate 500)
+    '#475569', // dark
+    '#334155',
+    '#1e293b', // darker
+    '#0f172a'
+  ];
+
+  let errorColors = ['#fef2f2', '#fee2e2', '#ef4444', '#b91c1c', '#7f1d1d'];
+  let warningColors = ['#fffbeb', '#fef3c7', '#f59e0b', '#b45309', '#78350f'];
+  let infoColors = ['#ecfeff', '#cffafe', '#06b6d4', '#0e7490', '#155e75'];
+  let successColors = ['#f0fdf4', '#dcfce7', '#10b981', '#047857', '#14532d'];
 
   return {
     primary: {
