@@ -107,7 +107,8 @@ function Dashboard() {
             pensiun: 0,
             aktif: 0,
             rekeningBerbeda: 0,
-            total: 0,
+            totalUpload: 0,  // Total records uploaded
+            totalPegawai: 0, // Calculated: totalUpload - pensiun - keluar - pindah + masuk
           };
         }
 
@@ -132,12 +133,19 @@ function Dashboard() {
             unitBreakdown[unit].aktif++;
         }
 
-        unitBreakdown[unit].total++;
+        unitBreakdown[unit].totalUpload++;
 
         // Count manual overrides
         if (emp.manual_override === 1) {
           totalManualOverride++;
         }
+      });
+
+      // Calculate Total Pegawai Aktif for each unit
+      // Formula: totalUpload - pensiun - keluar - pindah + masuk
+      Object.keys(unitBreakdown).forEach((unit) => {
+        const u = unitBreakdown[unit];
+        u.totalPegawai = u.totalUpload - u.pensiun - u.keluar - u.pindah + u.masuk;
       });
 
       // Calculate totals across all units
@@ -148,7 +156,8 @@ function Dashboard() {
         pensiun: 0,
         aktif: 0,
         rekeningBerbeda: 0,
-        total: data.length,
+        totalUpload: data.length,
+        totalPegawai: 0,
       };
 
       Object.values(unitBreakdown).forEach((unit) => {
@@ -158,6 +167,7 @@ function Dashboard() {
         totals.pensiun += unit.pensiun;
         totals.aktif += unit.aktif;
         totals.rekeningBerbeda += unit.rekeningBerbeda;
+        totals.totalPegawai += unit.totalPegawai;
       });
 
       setStats({
@@ -286,8 +296,8 @@ function Dashboard() {
           <div className="summary-card">
             <div className="card-icon">👥</div>
             <div className="card-content">
-              <h4>{stats.totalRecords}</h4>
-              <p>Total Pegawai</p>
+              <h4>{stats.totals.totalPegawai}</h4>
+              <p>Total Pegawai Aktif</p>
             </div>
           </div>
           <div className="summary-card">
@@ -344,9 +354,20 @@ function Dashboard() {
               <tbody>
                 {Object.entries(stats.unitBreakdown)
                   .sort((a, b) => {
-                    const unitOrder = ["Dinas", "Cabdis Wil. 1", "Cabdis Wil. 2", "Cabdis Wil. 3", "Cabdis Wil. 4", "Cabdis Wil. 5", "Cabdis Wil. 6", "PPPK"];
+                    // Define unit order
+                    const unitOrder = [
+                      "Dinas",
+                      "Cabdis Wil. 1",
+                      "Cabdis Wil. 2",
+                      "Cabdis Wil. 3",
+                      "Cabdis Wil. 4",
+                      "Cabdis Wil. 5",
+                      "Cabdis Wil. 6",
+                      "PPPK",
+                    ];
                     const indexA = unitOrder.indexOf(a[0]);
                     const indexB = unitOrder.indexOf(b[0]);
+                    // If unit not in order list, put at end
                     if (indexA === -1) return 1;
                     if (indexB === -1) return -1;
                     return indexA - indexB;
@@ -372,7 +393,7 @@ function Dashboard() {
                           : "-"}
                       </td>
                       <td className="total-value">
-                        <strong>{breakdown.total}</strong>
+                        <strong>{breakdown.totalPegawai}</strong>
                       </td>
                     </tr>
                   ))}
@@ -398,7 +419,7 @@ function Dashboard() {
                     <strong>{stats.totals.rekeningBerbeda}</strong>
                   </td>
                   <td className="total-value">
-                    <strong>{stats.totals.total}</strong>
+                    <strong>{stats.totals.totalPegawai}</strong>
                   </td>
                 </tr>
               </tfoot>

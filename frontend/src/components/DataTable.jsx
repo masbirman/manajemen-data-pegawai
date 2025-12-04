@@ -100,7 +100,7 @@ function DataTable({
     selectedYearRef.current = year;
   }, [month, year]);
 
-  // Update activeUnit ref when it changes
+  // Update unit ref when it changes
   useEffect(() => {
     activeUnitRef.current = unit;
   }, [unit]);
@@ -121,6 +121,7 @@ function DataTable({
 
       try {
         // Use refs to get latest values (avoid stale closure)
+        // Fallback to row data if refs are null (e.g., in archive view without filters)
         const currentMonth = selectedMonthRef.current || params.data.month;
         const currentYear = selectedYearRef.current || params.data.year;
         const currentUnit = activeUnitRef.current || params.data.unit;
