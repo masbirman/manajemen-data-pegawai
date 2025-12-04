@@ -142,10 +142,11 @@ function Dashboard() {
       });
 
       // Calculate Total Pegawai Aktif for each unit
-      // Formula: totalUpload - pensiun - keluar - pindah + masuk
+      // Formula: totalUpload - pensiun - keluar - pindah
+      // Note: "Masuk" employees are already included in totalUpload, so we don't add them again
       Object.keys(unitBreakdown).forEach((unit) => {
         const u = unitBreakdown[unit];
-        u.totalPegawai = u.totalUpload - u.pensiun - u.keluar - u.pindah + u.masuk;
+        u.totalPegawai = u.totalUpload - u.pensiun - u.keluar - u.pindah;
       });
 
       // Calculate totals across all units
@@ -296,7 +297,7 @@ function Dashboard() {
           <div className="summary-card">
             <div className="card-icon">👥</div>
             <div className="card-content">
-              <h4>{stats.totals.totalPegawai}</h4>
+              <h4>{stats.totals?.totalPegawai || 0}</h4>
               <p>Total Pegawai Aktif</p>
             </div>
           </div>
