@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: #1e1b4b; /* Solid Deep Navy 950 */
   padding: 20px;
 }
 
@@ -109,7 +109,7 @@
 .admin-login-button {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+  background: #4f46e5; /* Solid Indigo 600 */
   color: white;
   border: none;
   border-radius: 10px;

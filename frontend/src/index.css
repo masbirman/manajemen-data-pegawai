@@ -5,10 +5,26 @@
 @import "simplebar-react/dist/simplebar.min.css";
 
 :root {
-  --sidebar-primary: #1e3a8a;
-  --sidebar-secondary: #1e40af;
-  --accent-color: #4680ff;
+  --sidebar-primary: #312e81; /* Deep Navy to match theme */
+  --sidebar-secondary: #1e1b4b;
+  --accent-color: #4f46e5;
   --app-font: "Inter", sans-serif;
+  
+  /* Added missing variables used in AdminPanel.css */
+  --primary-color: #312e81;
+  --primary-dark: #1e1b4b;
+  --secondary-color: #475569;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --bg-card: #ffffff;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --status-masuk: #15803d;
+  --status-masuk-bg: #dcfce7;
+  --status-keluar: #b91c1c;
+  --status-keluar-bg: #fee2e2;
 }
 
 html,
