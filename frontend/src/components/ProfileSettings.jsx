@@ -4,6 +4,16 @@ import "./ProfileSettings.css";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
+// Helper to build avatar URL with cache-busting
+const buildAvatarUrl = (avatarUrl) => {
+  if (!avatarUrl) return null;
+  const timestamp = new Date().getTime();
+  const baseUrl = avatarUrl.startsWith('/uploads')
+    ? `${API_BASE_URL}${avatarUrl}`
+    : avatarUrl;
+  return `${baseUrl}?t=${timestamp}`;
+};
+
 function ProfileSettings() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +41,8 @@ function ProfileSettings() {
         full_name: response.data.full_name || "",
         email: response.data.email || "",
       });
-      setAvatarPreview(response.data.avatar_url);
+      // Use cache-busting helper
+      setAvatarPreview(buildAvatarUrl(response.data.avatar_url));
       setLoading(false);
     } catch (error) {
       showMessage("error", "Gagal memuat profil");
@@ -107,7 +118,10 @@ function ProfileSettings() {
           }
         );
 
-        setAvatarPreview(avatarResponse.data.avatar_url);
+        // Use cache-busting helper for new avatar
+        setAvatarPreview(buildAvatarUrl(avatarResponse.data.avatar_url));
+        // Reset file to prevent re-upload on next save
+        setAvatarFile(null);
       }
 
       showMessage("success", "Profil berhasil diupdate!");
@@ -204,6 +218,7 @@ function ProfileSettings() {
               </label>
               {avatarPreview && (
                 <button
+                  type="button"
                   className="delete-avatar-btn"
                   onClick={handleDeleteAvatar}
                 >

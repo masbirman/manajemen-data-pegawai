@@ -15,8 +15,8 @@ function getColorStyle({ variant, color, theme }) {
   const shadows = getShadow(theme, buttonShadow);
 
   const commonShadow = {
-    "&::after": { boxShadow: `0 0 5px 5px ${alpha(main, 0.9)}` },
-    "&:active::after": { boxShadow: `0 0 0 0 ${alpha(main, 0.9)}` },
+    // "&::after": { boxShadow: `0 0 5px 5px ${alpha(main, 0.9)}` }, // Removed glow
+    // "&:active::after": { boxShadow: `0 0 0 0 ${alpha(main, 0.9)}` },
     "&:focus-visible": { outline: `2px solid ${dark}`, outlineOffset: 2 },
   };
 
@@ -95,27 +95,7 @@ export default function Button(theme) {
       styleOverrides: {
         root: {
           fontWeight: 400,
-          "&::after": {
-            content: '""',
-            display: "block",
-            position: "absolute",
-            left: 0,
-            top: 0,
-            width: "100%",
-            height: "100%",
-            borderRadius: 8,
-            opacity: 0,
-            transition: "all 0.5s",
-          },
-
-          "&:active::after": {
-            position: "absolute",
-            borderRadius: 8,
-            left: 0,
-            top: 0,
-            opacity: 1,
-            transition: "0s",
-          },
+          // Removed complex after/glow effects for clean look
         },
         contained: {
           ...disabledStyle,

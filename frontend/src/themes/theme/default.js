@@ -3,32 +3,32 @@
 export default function Default(mode) {
   const contrastText = '#fff';
 
-  // Modern Indigo/Blue Palette
+  // Elegant Deep Blue Palette (Solid, Corporate, Clean)
   let primaryColors = [
-    '#eff6ff', // lighter (50)
-    '#dbeafe', // 100
-    '#bfdbfe', // 200
-    '#93c5fd', // light (300)
-    '#60a5fa', // 400
-    '#2563eb', // main (600) - Vibrant Blue
-    '#1d4ed8', // dark (700)
-    '#1e40af', // 800
-    '#1e3a8a', // darker (900) - Deep Indigo
-    '#172554'  // 950
+    '#eef2ff', // lighter (50) - Very faint blue for backgrounds
+    '#e0e7ff', // 100
+    '#c7d2fe', // 200
+    '#a5b4fc', // light (300)
+    '#818cf8', // 400
+    '#4f46e5', // main (600) - Indigo 600 (Clean, Sharp)
+    '#4338ca', // dark (700)
+    '#3730a3', // 800
+    '#312e81', // darker (900) - Deep Indigo/Navy
+    '#1e1b4b'  // 950
   ];
 
-  // Slate/Gray Palette for Secondary
+  // Clean Neutral Grey/Slate Palette for minimal distraction
   let secondaryColors = [
-    '#f8fafc', // lighter
-    '#f1f5f9',
-    '#e2e8f0',
-    '#cbd5e1', // light
-    '#94a3b8',
-    '#64748b', // main (Slate 500)
-    '#475569', // dark
-    '#334155',
-    '#1e293b', // darker
-    '#0f172a'
+    '#f9fafb', // lighter (Gray 50) - Almost white
+    '#f3f4f6', // 100
+    '#e5e7eb', // 200
+    '#d1d5db', // light (300)
+    '#9ca3af', // 400
+    '#6b7280', // main (Gray 500)
+    '#4b5563', // dark (600)
+    '#374151', // 700
+    '#1f2937', // darker (800)
+    '#111827'  // 900
   ];
 
   let errorColors = ['#fef2f2', '#fee2e2', '#ef4444', '#b91c1c', '#7f1d1d'];

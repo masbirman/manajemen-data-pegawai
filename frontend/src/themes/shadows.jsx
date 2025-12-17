@@ -16,12 +16,12 @@ export default function CustomShadows(theme) {
     info: `0 0 0 2px ${alpha(theme.palette.info.main, 0.2)}`,
     success: `0 0 0 2px ${alpha(theme.palette.success.main, 0.2)}`,
     grey: `0 0 0 2px ${alpha(theme.palette.secondary.main, 0.2)}`,
-    primaryButton: `0 14px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
-    secondaryButton: `0 14px 12px ${alpha(theme.palette.secondary.main, 0.2)}`,
-    errorButton: `0 14px 12px ${alpha(theme.palette.error.main, 0.2)}`,
-    warningButton: `0 14px 12px ${alpha(theme.palette.warning.main, 0.2)}`,
-    infoButton: `0 14px 12px ${alpha(theme.palette.info.main, 0.2)}`,
-    successButton: `0 14px 12px ${alpha(theme.palette.success.main, 0.2)}`,
-    greyButton: `0 14px 12px ${alpha(theme.palette.secondary.main, 0.2)}`
+    primaryButton: `0 4px 6px ${alpha(theme.palette.primary.main, 0.2)}`,
+    secondaryButton: `0 4px 6px ${alpha(theme.palette.secondary.main, 0.2)}`,
+    errorButton: `0 4px 6px ${alpha(theme.palette.error.main, 0.2)}`,
+    warningButton: `0 4px 6px ${alpha(theme.palette.warning.main, 0.2)}`,
+    infoButton: `0 4px 6px ${alpha(theme.palette.info.main, 0.2)}`,
+    successButton: `0 4px 6px ${alpha(theme.palette.success.main, 0.2)}`,
+    greyButton: `0 4px 6px ${alpha(theme.palette.secondary.main, 0.2)}`
   };
 }

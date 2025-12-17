@@ -1,5 +1,4 @@
 import PropTypes from "prop-types";
-import { useMemo } from "react";
 
 // material-ui
 import { alpha } from "@mui/material/styles";
@@ -24,11 +23,8 @@ export default function Header({ currentUser, onLogout }) {
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
 
-  // header content
-  const headerContent = useMemo(
-    () => <HeaderContent currentUser={currentUser} onLogout={onLogout} />,
-    [currentUser, onLogout]
-  );
+  // Render HeaderContent directly - it manages its own state internally
+  const headerContent = <HeaderContent currentUser={currentUser} onLogout={onLogout} />;
 
   // common header
   const mainHeader = (
@@ -56,8 +52,8 @@ export default function Header({ currentUser, onLogout }) {
     position: "fixed",
     elevation: 0,
     sx: (theme) => ({
-      bgcolor: "#ffffff", // Solid white
-      borderBottom: "1px solid #e2e8f0", // Subtle border
+      bgcolor: theme.palette.background.paper, // Use theme background
+      borderBottom: `1px solid ${theme.palette.divider}`, // Use theme divider
       zIndex: 1200,
       width: {
         xs: "100%",

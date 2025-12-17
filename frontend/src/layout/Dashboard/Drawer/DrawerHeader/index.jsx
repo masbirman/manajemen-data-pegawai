@@ -86,15 +86,15 @@ export default function DrawerHeader({ open, currentUser }) {
               sx={{
                 width: 40,
                 height: 40,
-                borderRadius: "10px",
-                background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", // Brighter Blue
+                borderRadius: "8px", // Slightly sharper
+                bgcolor: "primary.main", // Solid color from theme
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "white",
                 fontWeight: 700,
                 fontSize: "1.2rem",
-                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.2)"
+                boxShadow: "none" // Clean, no shadow
               }}
             >
               📊

@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { useState, useEffect } from "react";
 
 // material-ui
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -12,14 +13,59 @@ import Tooltip from "@mui/material/Tooltip";
 // icons
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import LogoutIcon from "@mui/icons-material/Logout";
-import PersonIcon from "@mui/icons-material/Person";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+
+// Helper to build avatar URL
+const buildAvatarUrl = (avatarUrl) => {
+  if (!avatarUrl) return null;
+  const baseUrl = avatarUrl.startsWith('/uploads')
+    ? `${API_BASE_URL}${avatarUrl}`
+    : avatarUrl;
+  return `${baseUrl}?t=${Date.now()}`;
+};
 
 // ==============================|| HEADER - CONTENT ||============================== //
 
-export default function HeaderContent({ currentUser, onLogout }) {
+export default function HeaderContent({ currentUser: propUser, onLogout }) {
   const downLG = useMediaQuery((theme) => theme.breakpoints.down("lg"));
+  
+  // Use internal state that can be updated independently
+  const [user, setUser] = useState(propUser);
+  const [avatarKey, setAvatarKey] = useState(Date.now());
+
+  // Sync with prop changes
+  useEffect(() => {
+    setUser(propUser);
+    setAvatarKey(Date.now());
+  }, [propUser, propUser?.avatar_url, propUser?._refreshedAt]);
+
+  // Listen for profile updates
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      // Read fresh user data from localStorage
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          setAvatarKey(Date.now()); // Force avatar re-render
+        } catch (e) {
+          console.warn("Failed to parse user from localStorage", e);
+        }
+      }
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+    window.addEventListener("storage", handleProfileUpdate);
+    
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+      window.removeEventListener("storage", handleProfileUpdate);
+    };
+  }, []);
+
+  const avatarUrl = buildAvatarUrl(user?.avatar_url);
 
   return (
     <>
@@ -42,7 +88,7 @@ export default function HeaderContent({ currentUser, onLogout }) {
       </Tooltip>
 
       {/* Profile Section */}
-      {currentUser && (
+      {user && (
         <Box
           sx={{
             display: "flex",
@@ -65,7 +111,7 @@ export default function HeaderContent({ currentUser, onLogout }) {
                 variant="subtitle2"
                 sx={{ fontWeight: 600, color: "text.primary", lineHeight: 1.2 }}
               >
-                {currentUser.full_name || currentUser.username}
+                {user.full_name || user.username}
               </Typography>
               <Typography
                 variant="caption"
@@ -75,20 +121,14 @@ export default function HeaderContent({ currentUser, onLogout }) {
                   fontSize: "0.75rem",
                 }}
               >
-                {currentUser.role}
+                {user.role}
               </Typography>
             </Box>
           )}
           
           <Avatar
-            src={
-              currentUser.avatar_url
-                ? currentUser.avatar_url.replace(
-                    /http:\/\/localhost:\d+/,
-                    API_BASE_URL
-                  )
-                : undefined
-            }
+            key={avatarKey}
+            src={avatarUrl}
             sx={{
               width: 40,
               height: 40,
@@ -98,8 +138,7 @@ export default function HeaderContent({ currentUser, onLogout }) {
               border: "2px solid #fff"
             }}
           >
-            {currentUser.full_name?.charAt(0) ||
-              currentUser.username?.charAt(0)}
+            {user.full_name?.charAt(0) || user.username?.charAt(0)}
           </Avatar>
 
           <Tooltip title="Logout">

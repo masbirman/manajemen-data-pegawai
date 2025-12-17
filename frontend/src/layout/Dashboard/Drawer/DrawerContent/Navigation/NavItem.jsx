@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 
 // material-ui
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme, alpha } from "@mui/material/styles";
 import Chip from "@mui/material/Chip";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -15,6 +16,7 @@ import { handlerDrawerOpen, useGetMenuMaster } from "../../../../../api/menu";
 // ==============================|| NAVIGATION - ITEM ||============================== //
 
 export default function NavItem({ item, level, activeMenu, onMenuChange }) {
+  const theme = useTheme();
   const downLG = useMediaQuery((theme) => theme.breakpoints.down("lg"));
 
   const { menuMaster } = useGetMenuMaster();
@@ -30,10 +32,10 @@ export default function NavItem({ item, level, activeMenu, onMenuChange }) {
   const isSelected = activeMenu === item.id;
   
   // Dark Sidebar Colors
-  const textColor = "#e2e8f0"; // Slate 200
+  const textColor = theme.palette.grey[300]; // Clean Light Grey
   const activeTextColor = "#ffffff";
-  const activeBgColor = "rgba(255, 255, 255, 0.1)"; // Glass effect
-  const hoverBgColor = "rgba(255, 255, 255, 0.05)";
+  const activeBgColor = alpha(theme.palette.primary.main, 0.2); // Solid active state using primary color
+  const hoverBgColor = alpha(theme.palette.common.white, 0.05);
 
   const itemHandler = () => {
     if (downLG) handlerDrawerOpen(false);
@@ -61,10 +63,10 @@ export default function NavItem({ item, level, activeMenu, onMenuChange }) {
               bgcolor: activeBgColor,
               color: activeTextColor,
               "&:hover": { 
-                bgcolor: activeBgColor,
+                bgcolor: activeBgColor, // Keep distinct
                 color: activeTextColor
               },
-              borderRight: "3px solid #60a5fa" // Accent border
+              borderRight: `3px solid ${theme.palette.primary.main}` // Solid accent from theme
             },
           }),
           ...(drawerOpen &&

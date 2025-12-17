@@ -140,6 +140,35 @@ function AppContent() {
     };
   }, [showNotification]);
 
+  // Listen for profile updates and reload user data from API
+  React.useEffect(() => {
+    const reloadUserProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token || !API_BASE_URL) return;
+
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          // Add timestamp to force React to detect change
+          userData._refreshedAt = Date.now();
+          setCurrentUser(userData);
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
+      } catch (error) {
+        console.warn("Failed to reload user profile:", error);
+      }
+    };
+
+    window.addEventListener("profileUpdated", reloadUserProfile);
+    return () => {
+      window.removeEventListener("profileUpdated", reloadUserProfile);
+    };
+  }, []);
+
   const handleUploadSuccess = async (result) => {
     setError(null);
     setUploadedMonth(result.month);
